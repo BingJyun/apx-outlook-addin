@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "generator-office": "^3.0.2",
+    "yo": "^6.0.0"
+  }
+}
