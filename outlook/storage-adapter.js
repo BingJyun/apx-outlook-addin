@@ -29,10 +29,10 @@
 
   /**
    * 取得 IndexedDB 連線。
-   * @returns {Promise<IDBDatabase>} IndexedDB 資料庫實例。
+   * @returns {IDBDatabase} IndexedDB 資料庫實例。
    * @throws {Error} 若 IndexedDB 不支援或開啟失敗。
    */
-  const getIndexedDB = async () => {
+  const getIndexedDB = () => {
     if (!window.indexedDB) {
       throw new Error('IndexedDB not supported');
     }
@@ -51,10 +51,10 @@
 
   /**
    * 取得 RoamingSettings。
-   * @returns {Promise<Object>} RoamingSettings 設定物件。
+   * @returns {Object} RoamingSettings 設定物件。
    * @throws {Error} 若 Office 環境無效。
    */
-  const getRoamingSettings = async () => {
+  const getRoamingSettings = () => {
     if (!Office || !Office.context || !Office.context.roamingSettings) {
       throw new Error('RoamingSettings not available');
     }
