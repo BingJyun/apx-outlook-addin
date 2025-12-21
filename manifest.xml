@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:bt="http://schemas.microsoft.com/office/officeapp/2010/namespace/binding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.microsoft.com/office/appforoffice/1.1 http://schemas.microsoft.com/office/appforoffice/1.1/officeapp.xsd" xsi:type="MailApp">
+  <Id>12345678-1234-1234-1234-123456789012</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>APX.AI</ProviderName>
+  <DefaultLocale>zh-TW</DefaultLocale>
+  <DisplayName DefaultValue="APX.AI 安全傳送" />
+  <Description DefaultValue="使用 APX.AI 安全傳送大型附件，保護企業機密資料。" />
+  <IconUrl DefaultValue="./icons/icon80.png" />
+  <Hosts>
+    <Host Name="Mailbox" />
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.1" />
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="./taskpane.html" />
+      </DesktopSettings>
+    </Form>
+    <Form xsi:type="ItemEdit">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="./taskpane.html" />
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteMailbox</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="ReadOrEdit" />
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailapp/1.1" xsi:type="VersionOverridesV1_1">
+    <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailapp/1.0" xsi:type="VersionOverridesV1_0">
+      <Description resid="residDescription" />
+      <Requirements>
+        <bt:Sets DefaultMinVersion="1.5">
+          <bt:Set Name="Mailbox" />
+        </bt:Sets>
+      </Requirements>
+      <Hosts>
+        <Host xsi:type="MailHost">
+          <DesktopFormFactor>
+            <ExtensionPoint xsi:type="MessageReadCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="msgReadGroup">
+                  <Label resid="residGroupLabel" />
+                  <Control xsi:type="Button" id="msgReadOpenPaneButton">
+                    <Label resid="residToolTip" />
+                    <Supertip>
+                      <Title resid="residLabel" />
+                      <Description resid="residTooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="residIcon16" />
+                      <bt:Image size="32" resid="residIcon32" />
+                      <bt:Image size="80" resid="residIcon80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <TaskpaneId>ButtonId1</TaskpaneId>
+                      <SourceLocation resid="residUnitConverterUrl" />
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+            <ExtensionPoint xsi:type="MessageComposeCommandSurface">
+              <OfficeTab id="TabDefault">
+                <Group id="msgComposeGroup">
+                  <Label resid="residGroupLabel" />
+                  <Control xsi:type="Button" id="msgComposeOpenPaneButton">
+                    <Label resid="residToolTip" />
+                    <Supertip>
+                      <Title resid="residLabel" />
+                      <Description resid="residTooltip" />
+                    </Supertip>
+                    <Icon>
+                      <bt:Image size="16" resid="residIcon16" />
+                      <bt:Image size="32" resid="residIcon32" />
+                      <bt:Image size="80" resid="residIcon80" />
+                    </Icon>
+                    <Action xsi:type="ShowTaskpane">
+                      <TaskpaneId>ButtonId2</TaskpaneId>
+                      <SourceLocation resid="residUnitConverterUrl" />
+                    </Action>
+                  </Control>
+                </Group>
+              </OfficeTab>
+            </ExtensionPoint>
+          </DesktopFormFactor>
+        </Host>
+      </Hosts>
+      <Resources>
+        <bt:Images>
+          <bt:Image id="residIcon16" DefaultValue="./icons/icon16.png" />
+          <bt:Image id="residIcon32" DefaultValue="./icons/icon32.png" />
+          <bt:Image id="residIcon80" DefaultValue="./icons/icon80.png" />
+        </bt:Images>
+        <bt:Urls>
+          <bt:Url id="residUnitConverterUrl" DefaultValue="./taskpane.html" />
+        </bt:Urls>
+        <bt:ShortStrings>
+          <bt:String id="residLabel" DefaultValue="用 APX.AI 安全傳送" />
+          <bt:String id="residToolTip" DefaultValue="用 APX.AI 安全傳送" />
+          <bt:String id="residGroupLabel" DefaultValue="APX.AI" />
+        </bt:ShortStrings>
+        <bt:LongStrings>
+          <bt:String id="residDescription" DefaultValue="使用 APX.AI 安全傳送大型附件，保護企業機密資料。" />
+          <bt:String id="residTooltip" DefaultValue="點擊以使用 APX.AI 安全傳送附件。" />
+        </bt:LongStrings>
+      </Resources>
+    </VersionOverrides>
+  </VersionOverrides>
+</OfficeApp>
