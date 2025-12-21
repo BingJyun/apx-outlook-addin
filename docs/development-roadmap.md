@@ -2,22 +2,41 @@
 
 基於 PRD v1.0，總步驟 9，單檔/小步模式，每檔 <300 行。依賴 /shared 全重用，ESLint strict mode 全程。
 
-1. [ ] **Manifest**  
-   - 產 manifest.xml (v1.1 XML，Ribbon button、Taskpane 350px)。  
-   - 驗證：Sideload Outlook Web，檢查 Ribbon button 顯示。  
-   預估：manifest 200 行。依賴：無。
-
-2. [ ] **Storage Adapter**  
-   - 產 outlook/storage-adapter.js (indexedDB/roamingSettings 封裝 storage-core，暴露 apxStorage 方法，JSDoc 詳細)。  
-   - 驗證：Mock Office.js，手動測試 save/load/remove 與 7 天 expiry。  
-   預估：150 行。依賴：步1 (Office 環境)。
-
-## 3. Taskpane HTML & ESLint Setup
+## 1. Manifest & Icons Setup
 **目標**  
-建立 Outlook Taskpane 的唯一 HTML 入口，並確立全專案的 ESLint 嚴格規範。  
+建立 Outlook Add-in 的核心 manifest 與圖示資產。
+**產出檔案**  
+- manifest.xml  
+- icons/ 資料夾（root，已有 icon16/32/80.png，確認引用正確）  
+**實作規範（強制）**  
+- v1.1 XML 格式  
+- 定義 Ribbon button「用 APX.AI 安全傳送」（label 用 constants.GMAIL_BUTTON_TEXT）  
+- Taskpane 寬度 350px  
+- Compose 模式觸發  
+**驗證**  
+- Sideload Outlook Web，檢查 Ribbon button 顯示與 icons 載入  
+**依賴**  
+- 無
+
+## 2. Storage Adapter
+**目標**  
+建立 Outlook 專屬的 storage 抽象層。  
+**產出檔案**  
+- outlook/storage-adapter.js  
+**實作規範（強制）**  
+- 使用 indexedDB/roamingSettings 封裝 shared/storage-core  
+- 暴露 window.apxStorage（save/load/remove auth/serverUrl，7 天 expiry）  
+- 詳細 JSDoc  
+**驗證**  
+- Mock Office.js，手動測試 save/load/remove 與 expiry  
+**依賴**  
+- Step 1（Office 環境）
+
+## 3. Taskpane HTML & ESLint Config Setup
+**目標**  
+建立 Outlook Taskpane 的唯一 HTML 入口，並確立全專案的 ESLint 嚴格規範（package.json 已存在）。  
 **產出檔案**  
 - outlook/taskpane.html  
-- package.json  
 - .eslintrc.json  
 **實作規範（強制）**  
 - taskpane.html 為單一 HTML，寬度 350px  
@@ -30,10 +49,7 @@
   - Loading View  
   - Error View  
 - 所有 View 僅用 data-view attribute 控制顯示，不得 inline JS  
-- ESLint 必須為 devDependencies  
-- 使用 eslint:recommended 為基礎  
-- 啟用 strict 規則（禁止 var、magic number、unused）  
-- 假設所有後續 JS 皆需通過 `npx eslint .`  
+- ESLint 使用 eslint:recommended 為基礎 + strict 規則（禁止 var、magic number、unused）  
 **驗證**  
 - 直接用瀏覽器開啟 taskpane.html，檢查像素與 Gmail 版一致  
 - 執行 `npx eslint .` 必須 0 error  
