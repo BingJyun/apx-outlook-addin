@@ -10,22 +10,22 @@
   'use strict';
 
   /**
-   * IndexedDB 資料庫名稱與版本。
+   * IndexedDB 資料庫名稱。
    * @constant {string}
    */
-  const DB_NAME = 'ApxOutlookStorage';
+  const DB_NAME = window.constants.DB_NAME;
 
   /**
    * IndexedDB 物件存放區名稱。
    * @constant {string}
    */
-  const STORE_NAME = 'keyValueStore';
+  const STORE_NAME = window.constants.STORE_NAME;
 
   /**
    * IndexedDB 版本號。
    * @constant {number}
    */
-  const DB_VERSION = 1;
+  const DB_VERSION = window.constants.DB_VERSION;
 
   /**
    * 取得 IndexedDB 連線。
