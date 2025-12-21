@@ -1,4 +1,4 @@
-# APX.AI Secure Transmission Outlook Add-in Development Roadmap (v1.0)
+# APX.AI Secure Transmission Outlook Add-in Development Roadmap (v1.1)
 
 基於 PRD v1.0，總步驟 9，單檔/小步模式，每檔 <300 行。依賴 /shared 全重用，ESLint strict mode 全程。
 
@@ -12,40 +12,135 @@
    - 驗證：Mock Office.js，手動測試 save/load/remove 與 7 天 expiry。  
    預估：150 行。依賴：步1 (Office 環境)。
 
-3. [ ] **Taskpane HTML & ESLint Setup**  
-   - 產 taskpane.html (像素級 View：Server URL、Login、私鑰驗證、Main、Loading、Error，Bootstrap CDN、toggle 樣式)。  
-   - 產 package.json + .eslintrc.json (ESLint strict mode，devDependencies eslint，參考 Gmail)。  
-   - 驗證：開 taskpane.html 瀏覽器，檢查 View 布局一致。跑 npx eslint .  
-   預估：taskpane 250 行，package/eslintrc 150 行。依賴：步1 (Taskpane 定義)。
+## 3. Taskpane HTML & ESLint Setup
+**目標**  
+建立 Outlook Taskpane 的唯一 HTML 入口，並確立全專案的 ESLint 嚴格規範。  
+**產出檔案**  
+- outlook/taskpane.html  
+- package.json  
+- .eslintrc.json  
+**實作規範（強制）**  
+- taskpane.html 為單一 HTML，寬度 350px  
+- 僅使用 Bootstrap CDN，不引入其他 UI framework  
+- View 必須完整包含：  
+  - Server URL Input View  
+  - Login View（帳號 / 密碼 / 密碼眼）  
+  - Private Key Verification View（.pem + 密碼眼）  
+  - Main View（收件人顯示、上傳區）  
+  - Loading View  
+  - Error View  
+- 所有 View 僅用 data-view attribute 控制顯示，不得 inline JS  
+- ESLint 必須為 devDependencies  
+- 使用 eslint:recommended 為基礎  
+- 啟用 strict 規則（禁止 var、magic number、unused）  
+- 假設所有後續 JS 皆需通過 `npx eslint .`  
+**驗證**  
+- 直接用瀏覽器開啟 taskpane.html，檢查像素與 Gmail 版一致  
+- 執行 `npx eslint .` 必須 0 error  
+**依賴**  
+- Step 1（Taskpane 定義）
 
-4. [ ] **View Switcher**  
-   - 產 outlook/view-switcher.js (Office.initialize 初始化、View 切換、storage 檢查導航、收件人讀取 to.getAsync，事件綁定)。  
-   - 驗證：Sideload，測試登入流程導航無誤。  
-   預估：200 行。依賴：步2-3 (storage + HTML)。
+## 4. View Switcher
+**目標**  
+集中管理所有 View 狀態切換與初始導航邏輯。  
+**產出檔案**  
+- outlook/view-switcher.js  
+**實作規範（強制）**  
+- 所有 Office.js 呼叫必須包在 `Office.initialize`  
+- View 切換只能透過本檔案公開 API  
+- 啟動流程：  
+  1. 檢查 storage-core 是否有完整認證  
+  2. 依結果導向對應 View  
+- 收件人資訊使用 `Office.context.mailbox.item.to.getAsync`  
+- 不得直接操作 storage（僅呼叫 shared/storage）  
+**驗證**  
+- Sideload Outlook Web  
+- 全登入流程 View 導航正確、無閃爍  
+**依賴**  
+- Step 2（storage）  
+- Step 3（HTML）
 
-5. [ ] **Upload Handler**  
-   - 產 outlook/upload-handler.js (登入/私鑰驗證、上傳 apiService.uploadFile、uploadStatus 更新，用 constants.getMessage)。  
-   - 驗證：模擬上傳，檢查 status 文字與 Gmail 一致。  
-   預估：180 行。依賴：步4 (View 切換)。
+## 5. Upload Handler
+**目標**  
+負責檔案上傳與即時狀態更新。  
+**產出檔案**  
+- outlook/upload-handler.js  
+**實作規範（強制）**  
+- 上傳僅呼叫 `/shared/apiService.uploadFile`  
+- 上傳狀態文字必須來自 `constants.getMessage`  
+- 不得在此檔案操作 DOM View 切換  
+- 不得處理 link 插入  
+**驗證**  
+- 模擬上傳流程  
+- Loading 與狀態文字與 Gmail 版完全一致  
+**依賴**  
+- Step 4（View Switcher）
 
-6. [ ] **Link Inserter**  
-   - 產 outlook/link-inserter.js (上傳成功後 prependAsync 插入 baseUrl 連結格式、成功訊息後關閉 Taskpane)。  
-   - 驗證：上傳後檢查郵件本文只 baseUrl 連結。  
-   預估：120 行。依賴：步5 (上傳完成)。
+## 6. Link Inserter
+**目標**  
+僅負責將下載連結插入郵件並關閉 Taskpane。  
+**產出檔案**  
+- outlook/link-inserter.js  
+**實作規範（強制）**  
+- 僅插入 server baseUrl（不含 taskId）  
+- 使用 `prependAsync`  
+- 成功後顯示短暫成功訊息，再關閉 Taskpane  
+- 不得進行任何上傳或驗證邏輯  
+**驗證**  
+- 郵件本文只出現 baseUrl  
+- 無多餘文字或 HTML  
+**依賴**  
+- Step 5（Upload 完成）
 
-7. [ ] **Ribbon & Attachment Handlers**  
-   - 產 outlook/ribbon-handler.js (Ribbon button 手動開 Taskpane)。  
-   - 產 outlook/attachment-handler.js (監聽 attachmentsChanged，偵測 >25MB 單檔、removeAttachmentAsync、自動開 Taskpane)。  
-   - 驗證：點 Ribbon 開 Taskpane；加大檔自動觸發 + 移除原附件。  
-   預估：各 150 行。依賴：步6 (Taskpane 完整)。
+## 7. Ribbon & Attachment Handlers
+**目標**  
+處理手動與自動觸發 Taskpane。  
+**產出檔案**  
+- outlook/ribbon-handler.js  
+- outlook/attachment-handler.js  
+**實作規範（強制）**  
+- Ribbon button 僅負責開啟 Taskpane  
+- attachmentsChanged：  
+  - 偵測單一附件 ≥ 25MB（數值來自 constants）  
+  - 自動移除原附件  
+  - 開啟 Taskpane  
+- 不得包含任何 UI 邏輯  
+**驗證**  
+- 點擊 Ribbon 正常開啟  
+- 加入大檔案自動觸發  
+**依賴**  
+- Step 6（Taskpane 完整）
 
-8. [ ] **Error Handler & Global Integration**  
-   - 產 outlook/error-handler.js (全域錯誤處理、導回 View、清除過期 storage、Error View 用 constants.getMessage)。  
-   - 小修多檔 (taskpane.js 等：Office Theme 適配、import shared 全覆蓋、無 magic)。  
-   - 驗證：模擬錯誤，檢查導回 + log 正確。  
-   預估：error 150 行，各檔 +30 行。依賴：步7 (所有 handler)。
+## 8. Error Handler & Global Integration
+**目標**  
+集中處理所有錯誤與全域整合收尾。  
+**產出檔案**  
+- outlook/error-handler.js  
+**實作規範（強制）**  
+- 所有錯誤導向 Error View  
+- 認證錯誤必須清除 storage-core  
+- 錯誤文字統一來自 constants.getMessage  
+- 不得 console.log（僅允許 console.error）  
+**驗證**  
+- 模擬失敗流程，導回正確 View  
+- 無殘留狀態  
+**依賴**  
+- Step 7（所有 handler）
 
-9. [ ] **完整 e2e 手動測試驗證**  
-   - Sideload Web/Desktop (PRD 第6節步驟)，測試全流程 (手動/自動、上傳/插入、7 天登入、錯誤分支、zhTW 文字、ESLint clean、無 console error)。  
-   - 驗證：記 bug，重現步驟；若錯，用 follow-up prompt 修正。  
-   預估：無 (測試文件)。依賴：步8 (全功能)。
+## 9. 完整 e2e 手動測試驗證
+**目標**  
+確認整體流程符合 PRD，且無工程債。  
+**測試項目**  
+- Outlook Web / Desktop sideload  
+- 手動 / 自動觸發  
+- 上傳 / 插入  
+- 7 天登入有效性  
+- 錯誤分支  
+- zh-TW 文字  
+- ESLint clean  
+- 無 console error  
+**結果**  
+- 記錄 bug 與重現步驟  
+- 問題以 follow-up prompt 修正  
+**依賴**  
+- Step 8（全功能完成）
