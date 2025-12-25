@@ -29,36 +29,43 @@
 
   /**
    * 取得 IndexedDB 連線。
-   * @returns {IDBDatabase} IndexedDB 資料庫實例。
+   * @returns {Promise<IDBDatabase>} IndexedDB 資料庫實例。
    * @throws {Error} 若 IndexedDB 不支援或開啟失敗。
    */
-  const getIndexedDB = () => {
+  const getIndexedDB = async () => {
     if (!window.indexedDB) {
       throw new Error('IndexedDB not supported');
     }
-    return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-      request.onerror = () => reject(new Error('IndexedDB open failed'));
-      request.onsuccess = () => resolve(request.result);
-      request.onupgradeneeded = (event) => {
+
+    const openRequest = window.indexedDB.open(DB_NAME, DB_VERSION);
+    
+    // 等待資料庫開啟或升級完成
+    await new Promise((resolve, reject) => {
+      openRequest.onsuccess = () => resolve();
+      openRequest.onerror = () => reject(new Error('IndexedDB open failed'));
+      openRequest.onupgradeneeded = (event) => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME);
         }
       };
     });
+
+    return openRequest.result;
   };
 
   /**
-   * 取得 RoamingSettings。
-   * @returns {Object} RoamingSettings 設定物件。
-   * @throws {Error} 若 Office 環境無效。
+   * 取得 Office RoamingSettings。
+   * @returns {Promise<Office.RoamingSettings>} RoamingSettings 實例。
+   * @throws {Error} 若 Office 環境未載入或 RoamingSettings 不可用。
    */
-  const getRoamingSettings = () => {
-    if (!Office || !Office.context || !Office.context.roamingSettings) {
-      throw new Error('RoamingSettings not available');
+  const getRoamingSettings = async () => {
+    if (!Office?.context?.roamingSettings) {
+      throw new Error('Office 環境未載入或 RoamingSettings 不可用');
     }
-    return Office.context.roamingSettings;
+
+    // RoamingSettings 是同步可用，但為統一非同步風格加上 await Promise.resolve
+    return await Promise.resolve(Office.context.roamingSettings);
   };
 
   /**
