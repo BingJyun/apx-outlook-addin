@@ -95,7 +95,7 @@
       }
       return true;
     } catch (error) {
-      console.error('Error loading recipient:', error);
+      window.console.error('Error loading recipient:', error);
       showError('NO_RECIPIENT');
       return false;
     }
@@ -133,7 +133,7 @@
         showView(VIEWS.MAIN);
       }
     } catch (error) {
-      console.error('Error in checkStorageAndNavigate:', error);
+      window.console.error('Error in checkStorageAndNavigate:', error);
       showError('AUTH_EXPIRED');
     }
   };
