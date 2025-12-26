@@ -29,6 +29,8 @@
     SEVEN_DAYS_MS: 7 * 24 * 60 * 60 * 1000,
     DOWNLOAD_PATH: './temp/server-override',
     SUCCESS_CLOSE_DELAY: 1500,
+    DIALOG_HEIGHT_PERCENT: 80, // Taskpane 對話框高度百分比
+    DIALOG_WIDTH_PERCENT: 35,  // Taskpane 對話框寬度百分比
   };
 
   /**
