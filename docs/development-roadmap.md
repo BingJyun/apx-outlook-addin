@@ -76,23 +76,37 @@
 - Step 2（storage）  
 - Step 3（HTML）
 
-## 5. Upload Handler
+## 5. Auth Handler
+**目標**  
+專責處理登入、登出、私鑰驗證與 storage 存取邏輯。  
+**產出檔案**  
+- outlook/auth-handler.js  
+**實作規範（強制）**  
+- 負責 saveCredentials、verifyPrivateKey、logout 等（清除 storage）  
+- 所有 storage 操作透過 window.apxStorage  
+- 驗證成功後通知 view-switcher 切換到 Main View  
+- 錯誤拋出交給 error-handler  
+**驗證**  
+- Sideload，測試完整登入 → Main View、登出 → Login View  
+**依賴**  
+- Step 4（View Switcher）
+
+## 6. Upload Handler
 **目標**  
 負責檔案上傳與即時狀態更新。  
 **產出檔案**  
 - outlook/upload-handler.js  
 **實作規範（強制）**  
-- 上傳僅呼叫 `/shared/apiService.uploadFile`  
-- 上傳狀態文字必須來自 `constants.getMessage`  
-- 不得在此檔案操作 DOM View 切換  
-- 不得處理 link 插入  
+- 上傳僅呼叫 /shared/apiService.uploadFile  
+- 上傳狀態文字必須來自 constants.getMessage  
+- 成功後通知 link-inserter 插入 baseUrl  
+- 不得操作 View 切換或 storage  
 **驗證**  
-- 模擬上傳流程  
-- Loading 與狀態文字與 Gmail 版完全一致  
+- 已登入狀態下選擇檔案上傳，檢查 status 文字與 Gmail 一致  
 **依賴**  
-- Step 4（View Switcher）
+- Step 5（Auth Handler）
 
-## 6. Link Inserter
+## 7. Link Inserter
 **目標**  
 僅負責將下載連結插入郵件並關閉 Taskpane。  
 **產出檔案**  
@@ -106,9 +120,9 @@
 - 郵件本文只出現 baseUrl  
 - 無多餘文字或 HTML  
 **依賴**  
-- Step 5（Upload 完成）
+- Step 6（Upload 完成）
 
-## 7. Ribbon & Attachment Handlers
+## 8. Ribbon & Attachment Handlers
 **目標**  
 處理手動與自動觸發 Taskpane。  
 **產出檔案**  
@@ -125,9 +139,9 @@
 - 點擊 Ribbon 正常開啟  
 - 加入大檔案自動觸發  
 **依賴**  
-- Step 6（Taskpane 完整）
+- Step 7（Taskpane 完整）
 
-## 8. Error Handler & Global Integration
+## 9. Error Handler & Global Integration
 **目標**  
 集中處理所有錯誤與全域整合收尾。  
 **產出檔案**  
@@ -141,9 +155,9 @@
 - 模擬失敗流程，導回正確 View  
 - 無殘留狀態  
 **依賴**  
-- Step 7（所有 handler）
+- Step 8（所有 handler）
 
-## 9. 完整 e2e 手動測試驗證
+## 10. 完整 e2e 手動測試驗證
 **目標**  
 確認整體流程符合 PRD，且無工程債。  
 **測試項目**  
@@ -159,4 +173,4 @@
 - 記錄 bug 與重現步驟  
 - 問題以 follow-up prompt 修正  
 **依賴**  
-- Step 8（全功能完成）
+- Step 9（全功能完成）
