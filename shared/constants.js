@@ -28,6 +28,7 @@
     ENABLE_ENCRYPTION: 'false',
     SEVEN_DAYS_MS: 7 * 24 * 60 * 60 * 1000,
     DOWNLOAD_PATH: './temp/server-override',
+    SUCCESS_CLOSE_DELAY: 1500,
   };
 
   /**
