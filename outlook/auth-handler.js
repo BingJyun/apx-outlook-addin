@@ -22,7 +22,7 @@
 
       const url = serverUrlInput.value.trim();
       if (!url) {
-        window.viewSwitcher.showError('SERVER_URL_TITLE'); // 暫用，未來 error-handler
+        window.errorHandler.showError('SERVER_URL_TITLE');
         return;
       }
 
@@ -52,7 +52,7 @@
       const password = loginPwd.value;
 
       if (!account || !password) {
-        window.viewSwitcher.showError('NO_LOGIN_DATA');
+        window.errorHandler.showError('NO_LOGIN_DATA');
         return;
       }
 
@@ -60,7 +60,7 @@
         await window.apxStorage.saveCredentials(account, password);
         window.viewSwitcher.showView('privateKeyView');
       } catch {
-        window.viewSwitcher.showError('UPLOAD_FAILED'); // 暫用
+        window.errorHandler.showError('UPLOAD_FAILED');
       }
     });
   };
@@ -81,7 +81,7 @@
       const file = pemFileInput.files[0];
 
       if (!file) {
-        window.viewSwitcher.showError('PRIVATE_KEY_TITLE'); // 暫用
+        window.errorHandler.showError('PRIVATE_KEY_TITLE');
         return;
       }
 
@@ -90,7 +90,7 @@
         await window.apxStorage.verifyPrivateKey(pemContent);
         window.viewSwitcher.showView('mainView');
       } catch {
-        window.viewSwitcher.showError('DOWNLOAD_AUTH_FAILED');
+        window.errorHandler.showError('DOWNLOAD_AUTH_FAILED');
       }
     });
   };
@@ -108,7 +108,7 @@
         await window.apxStorage.remove();
         window.viewSwitcher.showView('loginView');
       } catch {
-        window.viewSwitcher.showError('UPLOAD_FAILED'); // 暫用
+        window.errorHandler.showError('UPLOAD_FAILED');
       }
     });
   };

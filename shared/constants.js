@@ -71,6 +71,7 @@
         NO_TASK_ID: '伺服器未回傳任務ID。',
         NO_LOGIN_DATA: '無登入資料，請先登入',
         DOWNLOAD_AUTH_FAILED: '下載失敗：帳號、密碼或私鑰檔案有誤',
+        TASKPANE_OPEN_FAILED: '無法開啟安全傳送視窗，請檢查網路或重新嘗試。',
         // UI
         PROCESSING: '處理中...',
         UPLOADING: '檔案上傳中...',
@@ -121,6 +122,7 @@
         SERVER_PROCESSING: 'Server processing... (status: {status}, {attempt}/{max})',
         GMAIL_BUTTON_TEXT: '🔐 Send with APX.AI',
         DOWNLOAD_FILL_FIELDS: 'Please fill in account, password, select private key file, and enter private key password.',
+        TASKPANE_OPEN_FAILED: 'Failed to open secure send window, please check network or try again.',
       },
     };
     const msg = messages[language]?.[key] || key;

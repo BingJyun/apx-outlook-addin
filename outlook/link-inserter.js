@@ -48,8 +48,7 @@ async function insertDownloadLink(fileName) {
     Office.context.ui.closeContainer();
 
   } catch (error) {
-    // 錯誤交給 view-switcher 處理（暫時方案，未來 error-handler）
-    window.viewSwitcher.showError(error.message);
+    window.errorHandler.showError('UPLOAD_FAILED');
     throw error; // 重新拋出以便上層處理
   }
 }

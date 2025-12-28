@@ -88,7 +88,7 @@
       });
 
       if (!recipients || recipients.length === 0) {
-        showError('NO_RECIPIENT');
+        window.errorHandler.showError('NO_RECIPIENT');
         return false;
       }
 
@@ -101,7 +101,7 @@
       }
       return true;
     } catch {
-      showError('NO_RECIPIENT');
+      window.errorHandler.showError('NO_RECIPIENT');
       return false;
     }
   };

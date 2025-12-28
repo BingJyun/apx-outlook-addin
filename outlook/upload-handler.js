@@ -3,7 +3,6 @@
  * 專責處理檔案上傳邏輯與即時狀態更新。
  * 上傳僅呼叫 /shared/apiService.uploadFile。
  * 成功後通知 link-inserter 插入 baseUrl（不處理插入細節）。
- * 錯誤拋出交給 viewSwitcher.showError（暫時方案）。
  */
 
 (function() {
@@ -100,7 +99,7 @@
         try {
           await handleUpload();
         } catch {
-          window.viewSwitcher.showError('UPLOAD_FAILED');
+          window.errorHandler.showError('UPLOAD_FAILED');
         }
       });
     }

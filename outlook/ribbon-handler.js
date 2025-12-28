@@ -1,42 +1,50 @@
 /**
- * Ribbon handler for Outlook Add-in.
- * Handles the manual trigger from Ribbon button to open APX Taskpane.
- * 
- * This module defines the function associated with the Ribbon button in the manifest.
- * It opens the Taskpane as a dialog with the specified dimensions to match PRD requirements.
+ * APX.AI Outlook Ribbon Handler。
+ * 專責處理手動觸發 Taskpane。
+ * Ribbon button 僅負責開啟 Taskpane。
+ * 不得包含任何 UI 邏輯。
  */
 
-(function () {
-  "use strict";
+(function() {
+  'use strict';
 
-  // Office.initialize is included for consistency, though not strictly required for function commands
-  Office.initialize = function (_reason) {
-    // No specific initialization needed for ribbon handler
+  /**
+   * 開啟 Taskpane。
+   * 使用 Office.js displayDialogAsync。
+   * @returns {Promise<void>}
+   */
+  const openTaskpane = async () => {
+    const taskpaneUrl = `${window.location.protocol}//${window.location.host}/taskpane.html`;
+    await new Promise((resolve, reject) => {
+      Office.context.ui.displayDialogAsync(taskpaneUrl, {
+        height: window.constants.DEFAULTS.DIALOG_HEIGHT_PERCENT,
+        width: window.constants.DEFAULTS.DIALOG_WIDTH_PERCENT,
+        displayInIframe: true
+      }, (asyncResult) => {
+        if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+          resolve();
+        } else {
+          reject(new Error('Taskpane 開啟失敗'));
+        }
+      });
+    });
   };
 
   /**
-   * Opens the APX Taskpane as a dialog when the Ribbon button is clicked.
-   * Uses displayDialogAsync to present the Taskpane with width approximately 350px (35% of dialog width).
-   * 
-   * @param {Office.AddinCommands.Event} event - The event object passed by Office.js.
-   * @returns {void}
-   * @throws {Error} If dialog opening fails, but handled internally by Office.js.
+   * Ribbon button 點擊事件處理。
+   * @param {Office.RibbonControl} _control - Ribbon control（未使用）。
+   * @returns {Promise<void>}
    */
-  function openAppxTaskpane(event) {
-    // Construct Taskpane URL - in production, this should match the manifest's Taskpane URL
-    const taskpaneUrl = `${window.location.protocol}//${window.location.host}/taskpane.html`;
-    
-    // Open as dialog with PRD-specified width (350px approximated as 35% width)
-    Office.context.ui.displayDialogAsync(taskpaneUrl, {
-      height: window.constants.DEFAULTS.DIALOG_HEIGHT_PERCENT, // Full height for usability
-      width: window.constants.DEFAULTS.DIALOG_WIDTH_PERCENT,  // Approximate 350px width as per PRD
-      displayInIframe: true
-    });
-    
-    // Complete the event to inform Office.js that processing is done
-    event.completed();
-  }
+  const onRibbonButtonClick = async (_control) => {
+    try {
+      await openTaskpane();
+    } catch {
+      window.errorHandler.showError('TASKPANE_OPEN_FAILED');
+    }
+  };
 
-  // Associate the function with the Ribbon button defined in manifest.xml
-  Office.actions.associate("openAppxTaskpane", openAppxTaskpane);
+  // 暴露至全域（Office.js 調用）
+  window.ribbonHandler = {
+    onRibbonButtonClick,
+  };
 })();
