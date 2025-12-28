@@ -29,9 +29,8 @@
       try {
         await window.apxStorage.saveServerUrl(url);
         window.viewSwitcher.showView('loginView');
-      } catch (error) {
-        window.console.error('Error saving server URL:', error);
-        window.viewSwitcher.showError('UPLOAD_FAILED'); // 暫用
+      } catch {
+        window.errorHandler.showError('UPLOAD_FAILED');
       }
     });
   };
@@ -60,8 +59,7 @@
       try {
         await window.apxStorage.saveCredentials(account, password);
         window.viewSwitcher.showView('privateKeyView');
-      } catch (error) {
-        window.console.error('Error saving credentials:', error);
+      } catch {
         window.viewSwitcher.showError('UPLOAD_FAILED'); // 暫用
       }
     });
@@ -91,8 +89,7 @@
         const pemContent = await file.text();
         await window.apxStorage.verifyPrivateKey(pemContent);
         window.viewSwitcher.showView('mainView');
-      } catch (error) {
-        window.console.error('Error verifying private key:', error);
+      } catch {
         window.viewSwitcher.showError('DOWNLOAD_AUTH_FAILED');
       }
     });
@@ -110,8 +107,7 @@
       try {
         await window.apxStorage.remove();
         window.viewSwitcher.showView('loginView');
-      } catch (error) {
-        window.console.error('Error removing auth:', error);
+      } catch {
         window.viewSwitcher.showError('UPLOAD_FAILED'); // 暫用
       }
     });

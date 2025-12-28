@@ -94,8 +94,7 @@
         displayElement.textContent = memberReceiveAcc;
       }
       return true;
-    } catch (error) {
-      window.console.error('Error loading recipient:', error);
+    } catch {
       showError('NO_RECIPIENT');
       return false;
     }
@@ -132,8 +131,7 @@
       if (recipientLoaded) {
         showView(VIEWS.MAIN);
       }
-    } catch (error) {
-      window.console.error('Error in checkStorageAndNavigate:', error);
+    } catch {
       showError('AUTH_EXPIRED');
     }
   };

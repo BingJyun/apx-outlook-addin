@@ -99,8 +99,7 @@
       uploadBtn.addEventListener('click', async () => {
         try {
           await handleUpload();
-        } catch (error) {
-          window.console.error('Upload error:', error);
+        } catch {
           window.viewSwitcher.showError('UPLOAD_FAILED');
         }
       });
