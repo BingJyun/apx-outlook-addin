@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "generator-office": "^3.0.2",
+    "office-addin-manifest": "^2.1.2",
+    "yo": "^6.0.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "eslint": "^9.39.2"
+  }
+}
