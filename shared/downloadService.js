@@ -50,7 +50,10 @@
         onProgress(window.constants.getMessage('DOWNLOAD_AUTH_FAILED', 'zhTW'));
         throw new Error(window.constants.getMessage('DOWNLOAD_AUTH_FAILED', 'zhTW'));
       }
-      onProgress(`伺服器處理中... (狀態：${pollStatus || 'pending'}, ${i + 1}/${MAX_POLLS})`);
+      onProgress(window.constants.getMessage('SERVER_PROCESSING', 'zhTW')
+    .replace('{status}', pollStatus || 'pending')
+    .replace('{attempt}', i + 1)
+    .replace('{max}', MAX_POLLS));
     }
 
     throw new Error("下載超時。伺服器準備檔案時間過長。");

@@ -104,6 +104,7 @@
         ERROR_MESSAGE: '錯誤訊息',
       },
       enUS: {
+        // Errors
         UPLOAD_FAILED: 'Upload failed: HTTP {status} - {error}',
         DOWNLOAD_INIT_FAILED: 'Download init failed: HTTP {status} - {error}',
         AUTH_EXPIRED: 'Auth expired or invalid, please log in again.',
@@ -113,6 +114,8 @@
         NO_TASK_ID: 'No task ID returned from server.',
         NO_LOGIN_DATA: 'No login data, please log in first.',
         DOWNLOAD_AUTH_FAILED: 'Download failed: account, password, or private key file incorrect',
+        TASKPANE_OPEN_FAILED: 'Failed to open secure send window, please check network or try again.',
+        // UI
         PROCESSING: 'Processing...',
         UPLOADING: 'Uploading file...',
         DOWNLOADING: 'File ready, downloading...',
@@ -122,7 +125,26 @@
         SERVER_PROCESSING: 'Server processing... (status: {status}, {attempt}/{max})',
         GMAIL_BUTTON_TEXT: '🔐 Send with APX.AI',
         DOWNLOAD_FILL_FIELDS: 'Please fill in account, password, select private key file, and enter private key password.',
-        TASKPANE_OPEN_FAILED: 'Failed to open secure send window, please check network or try again.',
+        // UI labels
+        SERVER_URL_TITLE: 'Set Server URL',
+        SERVER_URL_DESCRIPTION: 'Please enter the APX.AI server URL',
+        SERVER_URL_PLACEHOLDER: 'e.g., https://apxpoc.ioneit.com',
+        CONTINUE_BUTTON: 'Continue',
+        LOGIN_TITLE: 'Login to APX.AI',
+        LOGIN_ACCOUNT_PLACEHOLDER: 'Account',
+        LOGIN_PASSWORD_PLACEHOLDER: 'Password',
+        LOGIN_BUTTON: 'Login',
+        PRIVATE_KEY_TITLE: 'Verify Your Private Key',
+        PRIVATE_KEY_PASSWORD_PLACEHOLDER: 'Private Key Password',
+        VERIFY_KEY_BUTTON: 'Complete Verification',
+        MAIN_TITLE: 'Use APX.AI Secure Send',
+        RECIPIENT_LABEL: 'Recipients:',
+        UPLOAD_BUTTON: 'Upload and Generate Link',
+        LOGOUT_BUTTON: 'Logout',
+        REFRESH_BUTTON: 'Refresh',
+        LOADING_TEXT: 'Loading',
+        PROCESSING_TEXT: 'Processing...',
+        ERROR_MESSAGE: 'Error Message',
       },
     };
     const msg = messages[language]?.[key] || key;
