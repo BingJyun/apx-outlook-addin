@@ -1,9 +1,9 @@
 /**
  * APX.AI Outlook View Switcher。
- * 集中管理所有 View 狀態切換與初始導航邏輯。
- * 啟動流程：檢查 storage-core 完整認證（serverUrl + auth + keyFileBase64 + 未過期），依結果導向對應 View。
- * 收件人使用 Office.context.mailbox.item.to.getAsync，取第一位顯示 memberReceiveAcc。
- * 公開 showView(viewName) API 供 handler 呼叫。
+ * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配。
+ * 所有 Office.js 呼叫包在 Office.initialize 內。
+ * 公開 API：showView(viewName)、showError(messageKey)。
+ * @module outlook/view-switcher
  */
 
 (function() {
@@ -33,16 +33,18 @@
 
   /**
    * 隱藏所有 View。
+   * @private
    */
   const hideAllViews = () => {
-    document.querySelectorAll('[data-view]').forEach(view => {
+    document.querySelectorAll('[data-view]').forEach((view) => {
       view.style.display = 'none';
     });
   };
 
   /**
    * 顯示指定 View。
-   * @param {string} viewName - View 名稱。
+   * @param {string} viewName - View 名稱（來自 VIEWS）。
+   * @public
    */
   const showView = (viewName) => {
     hideAllViews();
@@ -54,7 +56,8 @@
 
   /**
    * 顯示錯誤 View 並設定訊息。
-   * @param {string} messageKey - 錯誤訊息鍵。
+   * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
+   * @public
    */
   const showError = (messageKey) => {
     const errorElement = document.getElementById(ELEMENTS.ERROR_MESSAGE);
@@ -65,18 +68,21 @@
   };
 
   /**
-   * 讀取收件人資訊並顯示。
-   * @returns {Promise<boolean>} 是否成功讀取。
+   * 讀取收件人資訊並顯示於 recipientDisplay。
+   * 使用 Office.context.mailbox.item.to.getAsync，取第一位 email 的本地部分。
+   * @returns {Promise<boolean>} 成功讀取為 true，否則 false。
+   * @private
    */
   const loadRecipient = async () => {
     try {
       const item = Office.context.mailbox.item;
+      /** @type {Office.Recipients} */
       const recipients = await new Promise((resolve, reject) => {
         item.to.getAsync((result) => {
           if (result.status === Office.AsyncResultStatus.Succeeded) {
             resolve(result.value);
           } else {
-            reject(new Error('Failed to get recipients'));
+            reject(new Error(`收件人讀取失敗：${result.error.message}`));
           }
         });
       });
@@ -101,26 +107,28 @@
   };
 
   /**
-   * 檢查儲存狀態並導向對應 View。
+   * 檢查 storage 狀態並導向對應 View。
+   * 順序：serverUrl → auth → isAuthenticated → loadRecipient → mainView。
    * @returns {Promise<void>}
+   * @private
    */
   const checkStorageAndNavigate = async () => {
     try {
       // 檢查 serverUrl
       const serverUrlData = await window.apxStorage.loadServerUrl();
-      if (!serverUrlData || !serverUrlData.url) {
+      if (!serverUrlData?.url) {
         showView(VIEWS.SERVER_INPUT);
         return;
       }
 
       // 檢查 auth
       const authData = await window.apxStorage.load();
-      if (!authData || !authData.account || !authData.password) {
+      if (!authData?.account || !authData?.password) {
         showView(VIEWS.LOGIN);
         return;
       }
 
-      // 檢查 isAuthenticated
+      // 檢查 private key 驗證
       if (!authData.isAuthenticated) {
         showView(VIEWS.PRIVATE_KEY);
         return;
@@ -132,23 +140,63 @@
         showView(VIEWS.MAIN);
       }
     } catch {
-      showError('AUTH_EXPIRED');
+      if (window.errorHandler?.handleAuthError) {
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
+      } else {
+        showError('AUTH_EXPIRED');
+      }
+    }
+  };
+
+  /**
+   * 套用 Office 主題至 Taskpane body。
+   * 確保與 Outlook 主題同步（light/dark）。
+   * @private
+   */
+  const applyTheme = () => {
+    if (Office.context?.officeTheme) {
+      const theme = Office.context.officeTheme;
+      document.body.style.backgroundColor = theme.bodyBackgroundColor;
+      document.body.style.color = theme.bodyForegroundColor;
+    }
+  };
+
+  /**
+   * 監聽 Office 主題變更事件。
+   * 使用正確的 Office.js API：addHandlerAsync(Office.EventType.ThemeChanged)。
+   * @private
+   * @returns {Promise<void>}
+   */
+  const listenForThemeChanges = async () => {
+    try {
+      if (Office.context?.officeTheme?.addHandlerAsync) {
+        await Office.context.officeTheme.addHandlerAsync(
+          Office.EventType.ThemeChanged,
+          applyTheme
+        );
+      }
+    } catch {
+      // 靜默處理：主題監聽失敗不影響核心功能
     }
   };
 
   /**
    * 初始化 View Switcher。
-   * 包在 Office.initialize 內執行。
+   * 包含：loading → storage 檢查 → View 導航 + 主題套用/監聽。
    */
   Office.initialize = async () => {
-    // 初始顯示 loading
+    // 初始 loading
     showView(VIEWS.LOADING);
+
+    // 套用初始主題並監聽變更
+    applyTheme();
+    await listenForThemeChanges();
 
     // 檢查並導航
     await checkStorageAndNavigate();
   };
 
-  // 暴露 API
+  // 暴露公開 API
   window.viewSwitcher = {
     showView,
     showError,
