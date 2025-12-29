@@ -16,7 +16,7 @@
 async function insertDownloadLink(fileName, baseUrl) {
   try {
     // 建構下載連結（僅使用 server baseUrl，無 taskId）
-    const linkHtml = `<br><br>---<br>此檔案透過 APX.AI 安全傳送：<br><b>${fileName}</b> - <a href="${baseUrl}" target="_blank">點此到 APX.AI 下載</a>（建議使用 Chrome 瀏覽器開啟）`;
+    const linkHtml = `${window.constants.getMessage('UPLOAD_LINK_PREFIX', 'zhTW')}<br>${window.constants.getMessage('UPLOAD_LINK_BODY', 'zhTW').replace('{fileName}', fileName).replace('{baseUrl}', baseUrl)}`;
 
     // 使用 Office.js 插入連結到郵件本文
     await new Promise((resolve, reject) => {

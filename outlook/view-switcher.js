@@ -1,6 +1,6 @@
 /**
  * APX.AI Outlook View Switcher。
- * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配。
+ * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配、附件監聽。
  * 所有 Office.js 呼叫包在 Office.initialize 內。
  * 公開 API：showView(viewName)、showError(messageKey)、showSuccess(messageKey)、getRecipient()。
  * @module outlook/view-switcher
@@ -8,20 +8,6 @@
 
 (function() {
   'use strict';
-
-  /**
-   * View 名稱常數（避免 magic string）。
-   * @enum {string}
-   */
-  const VIEWS = {
-    SERVER_INPUT: 'serverInputView',
-    LOGIN: 'loginView',
-    PRIVATE_KEY: 'privateKeyView',
-    MAIN: 'mainView',
-    LOADING: 'loadingView',
-    ERROR: 'errorView',
-    SUCCESS: 'successView',
-  };
 
   /**
    * 將 Office.js callback 風格轉換為 Promise。
@@ -60,7 +46,7 @@
   /**
    * 初始化所有 [data-placeholder-key] 元素的 placeholder。
    * 使用 constants.getMessage(key, 'zhTW') 設定 placeholder。
-   * @returns {<void}
+   * @returns {void}
    * @private
    */
   const initPlaceholders = () => {
@@ -85,7 +71,7 @@
 
   /**
    * 顯示指定 View。
-   * @param {string} viewName - View 名稱（來自 VIEWS）。
+   * @param {string} viewName - View 名稱（來自 constants.VIEWS）。
    * @public
    */
   const showView = (viewName) => {
@@ -107,7 +93,7 @@
     if (successElement) {
       successElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
     }
-    showView(VIEWS.SUCCESS);
+    showView(window.constants.VIEWS.SUCCESS);
   };
 
   /**
@@ -160,27 +146,27 @@
       // 檢查 serverUrl
       const serverUrlData = await window.apxStorage.loadServerUrl();
       if (!serverUrlData?.url) {
-        showView(VIEWS.SERVER_INPUT);
+        showView(window.constants.VIEWS.SERVER_INPUT);
         return;
       }
 
       // 檢查 auth
       const authData = await window.apxStorage.load();
       if (!authData?.account || !authData?.password) {
-        showView(VIEWS.LOGIN);
+        showView(window.constants.VIEWS.LOGIN);
         return;
       }
 
       // 檢查 private key 驗證
       if (!authData.isAuthenticated) {
-        showView(VIEWS.PRIVATE_KEY);
+        showView(window.constants.VIEWS.PRIVATE_KEY);
         return;
       }
 
       // 載入收件人並顯示 mainView
       const memberReceiveAcc = await loadRecipient();
       if (memberReceiveAcc) {
-        showView(VIEWS.MAIN);
+        showView(window.constants.VIEWS.MAIN);
       }
     } catch {
       window.errorHandler.handleAuthError('AUTH_EXPIRED');
@@ -217,12 +203,45 @@
   };
 
   /**
+   * 附件變更事件處理。
+   * 檢查單一附件是否超過閾值，若是則移除並開啟 Taskpane。
+   * @param {Office.AttachmentsChangedEventArgs} _event - 事件引數（未使用）。
+   * @returns {Promise<void>}
+   * @private
+   */
+  const onAttachmentsChanged = async (_event) => {
+    const item = Office.context.mailbox.item;
+    const attachments = await promisifyOfficeCall((callback) => item.attachments.getAsync(callback));
+
+    if (attachments.length === 1) {
+      const attachment = attachments[0];
+      if (attachment.size > window.constants.DEFAULTS.MAX_FILE_SIZE_BYTES) {
+        await promisifyOfficeCall((callback) => item.removeAttachmentAsync(attachment.id, callback));
+        const taskpaneUrl = `${window.location.protocol}//${window.location.host}/taskpane.html`;
+        await new Promise((resolve, reject) => {
+          Office.context.ui.displayDialogAsync(taskpaneUrl, {
+            height: window.constants.DEFAULTS.DIALOG_HEIGHT_PERCENT,
+            width: window.constants.DEFAULTS.DIALOG_WIDTH_PERCENT,
+            displayInIframe: true
+          }, (asyncResult) => {
+            if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+              resolve();
+            } else {
+              reject(asyncResult.error);
+            }
+          });
+        });
+      }
+    }
+  };
+
+  /**
    * 初始化 View Switcher。
-   * 包含：loading → 初始化文字/佔位符 → storage 檢查 → View 導航 + 主題套用/監聽。
+   * 包含：loading → 初始化文字/佔位符 → storage 檢查 → View 導航 + 主題套用/監聽 + 附件監聽。
    */
   Office.initialize = async () => {
     // 初始 loading
-    showView(VIEWS.LOADING);
+    showView(window.constants.VIEWS.LOADING);
 
     // 初始化文字和佔位符
     initTexts();
@@ -231,6 +250,9 @@
     // 套用初始主題並監聽變更
     applyTheme();
     await listenForThemeChanges();
+
+    // 設定附件監聽
+    Office.context.mailbox.item.addHandlerAsync(Office.EventType.AttachmentsChanged, onAttachmentsChanged);
 
     // 檢查並導航
     await checkStorageAndNavigate();

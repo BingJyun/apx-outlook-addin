@@ -6,6 +6,20 @@
 
 (function() {
   /**
+   * View 名稱常數（避免 magic string）。
+   * @enum {string}
+   */
+  const VIEWS = {
+    SERVER_INPUT: 'serverInputView',
+    LOGIN: 'loginView',
+    PRIVATE_KEY: 'privateKeyView',
+    MAIN: 'mainView',
+    LOADING: 'loadingView',
+    ERROR: 'errorView',
+    SUCCESS: 'successView',
+  };
+
+  /**
    * API 端點常數（統一，未來 Outlook 可擴展）。
    */
   const API_ENDPOINTS = {
@@ -105,6 +119,9 @@
         LOADING_TEXT: '載入中',
         PROCESSING_TEXT: '處理中...',
         ERROR_MESSAGE: '錯誤訊息',
+        // 新增連結訊息鍵
+        UPLOAD_LINK_PREFIX: '此檔案透過 APX.AI 安全傳送：',
+        UPLOAD_LINK_BODY: '{fileName} - <a href="{baseUrl}" target="_blank">點此到 APX.AI 下載</a>（建議使用 Chrome 瀏覽器開啟）',
       },
       enUS: {
         // Errors
@@ -151,6 +168,9 @@
         LOADING_TEXT: 'Loading',
         PROCESSING_TEXT: 'Processing...',
         ERROR_MESSAGE: 'Error Message',
+        // 新增連結訊息鍵
+        UPLOAD_LINK_PREFIX: 'This file is sent securely via APX.AI:',
+        UPLOAD_LINK_BODY: '{fileName} - <a href="{baseUrl}" target="_blank">Click here to download from APX.AI</a> (Chrome browser recommended)',
       },
     };
     const msg = messages[language]?.[key] || key;
@@ -167,6 +187,7 @@
 
   // Global 暴露（Chrome 相容，Outlook import）
   window.constants = {
+    VIEWS,
     API_ENDPOINTS,
     DEFAULTS,
     STORAGE_KEYS,

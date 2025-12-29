@@ -28,7 +28,7 @@
 
       try {
         await window.apxStorage.saveServerUrl(url);
-        window.viewSwitcher.showView('loginView');
+        window.viewSwitcher.showView(window.constants.VIEWS.LOGIN);
       } catch {
         window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
@@ -58,7 +58,7 @@
 
       try {
         await window.apxStorage.saveCredentials(account, password);
-        window.viewSwitcher.showView('privateKeyView');
+        window.viewSwitcher.showView(window.constants.VIEWS.PRIVATE_KEY);
       } catch {
         window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
@@ -94,7 +94,7 @@
       try {
         const pemContent = await file.text();
         await window.apxStorage.verifyPrivateKey(pemContent);
-        window.viewSwitcher.showView('mainView');
+        window.viewSwitcher.showView(window.constants.VIEWS.MAIN);
       } catch {
         window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
@@ -112,7 +112,7 @@
     logoutBtn.addEventListener('click', async () => {
       try {
         await window.apxStorage.remove();
-        window.viewSwitcher.showView('loginView');
+        window.viewSwitcher.showView(window.constants.VIEWS.LOGIN);
       } catch {
         window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
@@ -127,8 +127,7 @@
    */
   const bindPasswordToggle = (inputId, toggleId, iconId) => {
     const toggleBtn = document.getElementById(toggleId);
-    const icon = document.getElementById(iconId);
-    if (!toggleBtn || !icon) {return;}
+    if (!toggleBtn) {return;}
 
     toggleBtn.addEventListener('click', () => {
       const input = document.getElementById(inputId);
@@ -136,7 +135,10 @@
 
       const isVisible = input.type === 'text';
       input.type = isVisible ? 'password' : 'text';
-      icon.className = isVisible ? window.constants.STYLES.PASSWORD_TOGGLE_HIDDEN : window.constants.STYLES.PASSWORD_TOGGLE_VISIBLE;
+      const icon = document.getElementById(iconId);
+      if (icon) {
+        icon.className = isVisible ? window.constants.STYLES.PASSWORD_TOGGLE_HIDDEN : window.constants.STYLES.PASSWORD_TOGGLE_VISIBLE;
+      }
     });
   };
 
