@@ -150,27 +150,48 @@
 - 所有錯誤導向 Error View  
 - 認證錯誤必須清除 storage-core  
 - 錯誤文字統一來自 constants.getMessage  
-- 不得 console.log（僅允許 console.error）  
+- 不得 console.log（僅允許 console.error，MVP 後移除）  
 **驗證**  
 - 模擬失敗流程，導回正確 View  
 - 無殘留狀態  
 **依賴**  
 - Step 8（所有 handler）
 
-## 10. 完整 e2e 手動測試驗證
+## 10. 中期一致性盤點與小重構
+**目標**  
+確保 Outlook 所有新檔（outlook/*.js）全域一致、零技術債，為 MVP 打最乾淨基礎。  
+**產出檔案**  
+- 小修 outlook/*.js（view-switcher、auth-handler、upload-handler、link-inserter、ribbon-handler、attachment-handler、error-handler）  
+**實作規範（強制）**  
+- 所有錯誤顯示統一走 errorHandler.showError  
+- 所有 View 切換統一走 viewSwitcher 公開 API  
+- 所有 storage 操作統一走 window.apxStorage  
+- Office.initialize 只定義一次（放在 view-switcher.js）  
+- 移除所有殘留 console.log/error（或統一到 errorHandler）  
+- 檢查所有 import 路徑正確、無重複 import  
+- 檢查所有 DOM id 引用與 taskpane.html 匹配  
+- 所有常數來自 /shared/constants  
+- 產出後所有 outlook/*.js 必須 npx eslint 0 error  
+**驗證**  
+- 全專案 npx eslint outlook/ 0 error  
+- 手動檢查錯誤流程全走 errorHandler  
+**依賴**  
+- Step 9（error-handler 完成）
+
+## 11. 完整 e2e 手動測試驗證
 **目標**  
 確認整體流程符合 PRD，且無工程債。  
 **測試項目**  
-- Outlook Web / Desktop sideload  
+- Outlook Web sideload（優先）
 - 手動 / 自動觸發  
-- 上傳 / 插入  
+- 上傳 / baseUrl 插入
 - 7 天登入有效性  
 - 錯誤分支  
 - zh-TW 文字  
-- ESLint clean  
+- ESLint clean（outlook/ 資料夾）
 - 無 console error  
 **結果**  
 - 記錄 bug 與重現步驟  
 - 問題以 follow-up prompt 修正  
 **依賴**  
-- Step 9（全功能完成）
+- Step 10（一致性盤點完成）
