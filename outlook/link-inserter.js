@@ -10,18 +10,12 @@
  *
  * @async
  * @param {string} fileName - 上傳檔案的名稱，用於連結格式。
- * @throws {Error} 如果載入伺服器 URL 失敗或插入連結失敗。
+ * @param {string} baseUrl - 伺服器 base URL，用於建構下載連結。
+ * @throws {Error} 如果插入連結失敗。
  */
-async function insertDownloadLink(fileName) {
+async function insertDownloadLink(fileName, baseUrl) {
   try {
-    // 載入伺服器 URL（從 storage 取得）
-    const serverUrl = await window.apxStorage.loadServerUrl();
-    if (!serverUrl) {
-      throw new Error('伺服器 URL 未設定');
-    }
-
     // 建構下載連結（僅使用 server baseUrl，無 taskId）
-    const baseUrl = serverUrl;
     const linkHtml = `<br><br>---<br>此檔案透過 APX.AI 安全傳送：<br><b>${fileName}</b> - <a href="${baseUrl}" target="_blank">點此到 APX.AI 下載</a>（建議使用 Chrome 瀏覽器開啟）`;
 
     // 使用 Office.js 插入連結到郵件本文
@@ -40,8 +34,7 @@ async function insertDownloadLink(fileName) {
     });
 
     // 顯示成功訊息（短暫）
-    const successMessage = window.constants.getMessage('SUCCESS', 'zhTW');
-    window.viewSwitcher.showSuccess(successMessage);
+    window.viewSwitcher.showSuccess('SUCCESS');
 
     // 延遲後關閉 Taskpane
     await window.utils.sleep(window.constants.DEFAULTS.SUCCESS_CLOSE_DELAY);
@@ -55,5 +48,5 @@ async function insertDownloadLink(fileName) {
 
 // 暴露全域函數（僅此一個公開 API）
 window.linkInserter = {
-  insertDownloadLink: insertDownloadLink,
+  insertDownloadLink,
 };

@@ -19,32 +19,6 @@
   };
 
   /**
-   * 載入收件人資訊。
-   * @returns {Promise<string>} memberReceiveAcc。
-   * @throws {Error} 載入失敗。
-   */
-  const loadRecipient = async () => {
-    const item = Office.context.mailbox.item;
-    const recipients = await new Promise((resolve, reject) => {
-      item.to.getAsync((result) => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
-          resolve(result.value);
-        } else {
-          reject(new Error('Failed to get recipients'));
-        }
-      });
-    });
-
-    if (!recipients || recipients.length === 0) {
-      throw new Error(window.constants.getMessage('NO_RECIPIENT', 'zhTW'));
-    }
-
-    const firstRecipient = recipients[0];
-    const email = firstRecipient.emailAddress || firstRecipient;
-    return email.split('@')[0];
-  };
-
-  /**
    * 處理上傳流程。
    * @returns {Promise<void>}
    */
@@ -54,21 +28,28 @@
     const file = fileInput.files[0];
 
     if (!file) {
-      throw new Error('請先選擇檔案');
+      window.errorHandler.showError('NO_FILE_SELECTED');
+      return;
     }
 
     // 載入必要資料
     const authData = await window.apxStorage.load();
     if (!authData || !authData.account || !authData.password || !authData.keyFileBase64) {
-      throw new Error(window.constants.getMessage('NO_LOGIN_DATA', 'zhTW'));
+      window.errorHandler.showError('NO_LOGIN_DATA');
+      return;
     }
 
     const serverUrlData = await window.apxStorage.loadServerUrl();
     if (!serverUrlData || !serverUrlData.url) {
-      throw new Error('無伺服器 URL');
+      window.errorHandler.showError('NO_SERVER_URL');
+      return;
     }
 
-    const memberReceiveAcc = await loadRecipient();
+    const memberReceiveAcc = await window.viewSwitcher.getRecipient();
+    if (!memberReceiveAcc) {
+      window.errorHandler.showError('NO_RECIPIENT');
+      return;
+    }
 
     // 更新狀態：上傳中
     uploadStatus.textContent = window.constants.getMessage('UPLOADING', 'zhTW');
@@ -86,7 +67,7 @@
     uploadStatus.textContent = window.constants.getMessage('SUCCESS', 'zhTW');
 
     // 通知 link-inserter 插入連結
-    window.linkInserter.insert(file.name, serverUrlData.url);
+    window.linkInserter.insertDownloadLink(file.name, serverUrlData.url);
   };
 
   /**

@@ -13,12 +13,23 @@
   /**
    * 顯示錯誤 View 並設定訊息。
    * 統一入口，所有錯誤由此呼叫。
+   * 直接設定 [data-key="ERROR_MESSAGE"] 以支援 i18n。
    * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
    * @throws {Error} 若 viewSwitcher 未準備好。
    */
   const showError = (messageKey) => {
     if (window.viewSwitcher && typeof window.viewSwitcher.showError === 'function') {
       window.viewSwitcher.showError(messageKey);
+    } else {
+      // Fallback：直接設定元素（避免循環依賴）
+      const errorElement = document.querySelector('[data-key="ERROR_MESSAGE"]');
+      if (errorElement) {
+        errorElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
+      }
+      // 切換到 error view（假設有 window.viewSwitcher）
+      if (window.viewSwitcher) {
+        window.viewSwitcher.showView('errorView');
+      }
     }
   };
 
