@@ -42,6 +42,38 @@
   };
 
   /**
+   * 初始化所有 [data-key] 元素的文字內容。
+   * 使用 constants.getMessage(key, 'zhTW') 設定 textContent。
+   * @returns {void}
+   * @private
+   */
+  const initTexts = () => {
+    const elements = document.querySelectorAll('[data-key]');
+    elements.forEach((element) => {
+      const key = element.getAttribute('data-key');
+      if (key) {
+        element.textContent = window.constants.getMessage(key, 'zhTW');
+      }
+    });
+  };
+
+  /**
+   * 初始化所有 [data-placeholder-key] 元素的 placeholder。
+   * 使用 constants.getMessage(key, 'zhTW') 設定 placeholder。
+   * @returns {<void}
+   * @private
+   */
+  const initPlaceholders = () => {
+    const elements = document.querySelectorAll('[data-placeholder-key]');
+    elements.forEach((element) => {
+      const key = element.getAttribute('data-placeholder-key');
+      if (key) {
+        element.placeholder = window.constants.getMessage(key, 'zhTW');
+      }
+    });
+  };
+
+  /**
    * 隱藏所有 View。
    * @private
    */
@@ -65,46 +97,8 @@
   };
 
   /**
-   * 初始化 i18n：將所有 [data-key] 元素設定為對應的本地化文字。
-   * @private
-   */
-  const initI18n = () => {
-    document.querySelectorAll('[data-key]').forEach((element) => {
-      const key = element.getAttribute('data-key');
-      if (key) {
-        element.textContent = window.constants.getMessage(key, 'zhTW');
-      }
-    });
-  };
-
-  /**
-   * 初始化 placeholders：將所有 [data-placeholder-key] 元素設定為對應的本地化文字。
-   * @private
-   */
-  const initPlaceholders = () => {
-    document.querySelectorAll('[data-placeholder-key]').forEach((element) => {
-      const key = element.getAttribute('data-placeholder-key');
-      if (key) {
-        element.placeholder = window.constants.getMessage(key, 'zhTW');
-      }
-    });
-  };
-
-  /**
-   * 顯示錯誤 View 並設定訊息。
-   * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
-   * @public
-   */
-  const showError = (messageKey) => {
-    const errorElement = document.querySelector('[data-key="ERROR_MESSAGE"]');
-    if (errorElement) {
-      errorElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
-    }
-    showView(VIEWS.ERROR);
-  };
-
-  /**
    * 顯示成功 View 並設定訊息。
+   * 直接使用 constants.getMessage(key, 'zhTW') 設定 textContent。
    * @param {string} messageKey - 成功訊息鍵值（來自 constants.MESSAGES）。
    * @public
    */
@@ -135,7 +129,7 @@
       const firstRecipient = recipients[0];
       const email = firstRecipient.emailAddress || firstRecipient;
       const memberReceiveAcc = email.split('@')[0];
-      const displayElement = document.querySelector('[data-key="RECIPIENT_DISPLAY"]');
+      const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
         displayElement.textContent = memberReceiveAcc;
       }
@@ -224,14 +218,14 @@
 
   /**
    * 初始化 View Switcher。
-   * 包含：loading → storage 檢查 → View 導航 + 主題套用/監聽。
+   * 包含：loading → 初始化文字/佔位符 → storage 檢查 → View 導航 + 主題套用/監聽。
    */
   Office.initialize = async () => {
     // 初始 loading
     showView(VIEWS.LOADING);
 
-    // 初始化 i18n 和 placeholders
-    initI18n();
+    // 初始化文字和佔位符
+    initTexts();
     initPlaceholders();
 
     // 套用初始主題並監聽變更
@@ -245,7 +239,6 @@
   // 暴露公開 API
   window.viewSwitcher = {
     showView,
-    showError,
     getRecipient,
     showSuccess,
   };

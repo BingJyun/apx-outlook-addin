@@ -22,7 +22,7 @@
 
       const url = serverUrlInput.value.trim();
       if (!url) {
-        window.errorHandler.showError('SERVER_URL_TITLE');
+        window.errorHandler.showError('EMPTY_SERVER_URL');
         return;
       }
 
@@ -30,7 +30,7 @@
         await window.apxStorage.saveServerUrl(url);
         window.viewSwitcher.showView('loginView');
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -60,7 +60,7 @@
         await window.apxStorage.saveCredentials(account, password);
         window.viewSwitcher.showView('privateKeyView');
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -79,9 +79,15 @@
       if (!pemFileInput || !pemPwdInput) {return;}
 
       const file = pemFileInput.files[0];
+      const pemPwd = pemPwdInput.value.trim();
 
       if (!file) {
-        window.errorHandler.showError('PRIVATE_KEY_TITLE');
+        window.errorHandler.showError('NO_PRIVATE_KEY_FILE');
+        return;
+      }
+
+      if (!pemPwd) {
+        window.errorHandler.showError('EMPTY_PRIVATE_KEY_PASSWORD');
         return;
       }
 
@@ -90,7 +96,7 @@
         await window.apxStorage.verifyPrivateKey(pemContent);
         window.viewSwitcher.showView('mainView');
       } catch {
-        window.errorHandler.showError('DOWNLOAD_AUTH_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -108,7 +114,7 @@
         await window.apxStorage.remove();
         window.viewSwitcher.showView('loginView');
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };

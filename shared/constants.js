@@ -55,7 +55,7 @@
   /**
    * i18n 中英（台灣用語），從 storage 載語言碼切換。
    * @param {string} key - 訊息鍵。
-   * @param {string} language - 'zhTW' | 'enUS'。
+   * @param {string} language - 'zhTW' | 'en-US'。
    * @returns {string} 訊息。
    */
   const getMessage = (key, language = 'zhTW') => {
@@ -64,7 +64,10 @@
         // 錯誤
         UPLOAD_FAILED: '上傳失敗：HTTP {status} - {error}',
         DOWNLOAD_INIT_FAILED: '下載初始化失敗：HTTP {status} - {error}',
+        EMPTY_SERVER_URL: '請輸入伺服器 URL',
         AUTH_EXPIRED: '認證資訊已過期或無效，請重新登入。',
+        NO_PRIVATE_KEY_FILE: '請選擇私鑰檔案',
+        EMPTY_PRIVATE_KEY_PASSWORD: '請輸入私鑰密碼',
         NO_RECIPIENT: '無法讀取有效的收件人 Email，請確認已在收件人欄位填寫。',
         FILE_TOO_LARGE: '檔案 "{name}" ({size} MB) 已超過 25MB 上限，將透過 APX.AI 安全傳送。',
         TIMEOUT: '下載逾時，伺服器處理過久。',
@@ -107,7 +110,10 @@
         // Errors
         UPLOAD_FAILED: 'Upload failed: HTTP {status} - {error}',
         DOWNLOAD_INIT_FAILED: 'Download init failed: HTTP {status} - {error}',
+        EMPTY_SERVER_URL: 'Please enter server URL',
         AUTH_EXPIRED: 'Auth expired or invalid, please log in again.',
+        NO_PRIVATE_KEY_FILE: 'Please select private key file',
+        EMPTY_PRIVATE_KEY_PASSWORD: 'Please enter private key password',
         NO_RECIPIENT: 'Cannot read valid recipient email. Please fill in the recipient field.',
         FILE_TOO_LARGE: 'File "{name}" ({size} MB) exceeds 25MB limit, use APX.AI secure send.',
         TIMEOUT: 'Download timeout, server too slow.',
