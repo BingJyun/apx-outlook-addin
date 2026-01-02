@@ -23,7 +23,7 @@
     }
     // 切換到錯誤 View（若 viewSwitcher 可用）
     if (window.viewSwitcher && typeof window.viewSwitcher.showView === 'function') {
-      window.viewSwitcher.showView('errorView');
+      window.viewSwitcher.showView(window.constants.VIEWS.ERROR);
     }
   };
 
