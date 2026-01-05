@@ -294,7 +294,7 @@
    */
   const saveServerUrl = async (url) => {
     const normalizedUrl = normalizeBaseUrl(url);
-    await saveWithExpiry(window.constants.STORAGE_KEYS.SERVER_URL, { normalizedUrl });
+    await saveWithExpiry(window.constants.STORAGE_KEYS.SERVER_URL, { url: normalizedUrl });
   };
 
   /**
