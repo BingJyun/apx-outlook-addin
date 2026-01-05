@@ -2,7 +2,7 @@
  * APX.AI Outlook View Switcher。
  * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配、附件監聽。
  * 所有 Office.js 呼叫包在 Office.initialize 內。
- * 公開 API：showView(viewName)、showError(messageKey)、showSuccess(messageKey)、getRecipient()。
+ * 公開 API：showView(viewName)、showSuccess(messageKey)、getRecipient()、updateRecipientDisplay()。
  * @module outlook/view-switcher
  */
 
@@ -78,6 +78,7 @@
     hideAllViews();
     const view = document.querySelector(`[data-view="${viewName}"]`);
     if (view) {
+      view.classList.add('active');
       view.style.display = 'block';
     }
   };
@@ -97,35 +98,49 @@
   };
 
   /**
-   * 讀取收件人資訊並顯示於 recipientDisplay。
-   * 顯示完整 email。
-   * 使用 Office.context.mailbox.item.to.getAsync，取第一位收件人。
-   * @returns {Promise<string|null>} memberReceiveAcc（本地部分）或 null。
-   * @throws 無收件人時顯示錯誤訊息。
+   * 讀取收件人資訊並更新顯示。
+   * 取第一位收件人的完整 email 顯示於 recipientDisplay。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>} 收件人資訊。
+   * @throws 無收件人時返回 null，不拋錯。
    * @private
    */
-  const loadRecipient = async () => {
+  const loadRecipientInfo = async () => {
     try {
       const item = Office.context.mailbox.item;
       /** @type {Office.Recipients} */
       const recipients = await promisifyOfficeCall((callback) => item.to.getAsync(callback));
 
       if (!recipients || recipients.length === 0) {
-        return null;
+        return { email: null, memberReceiveAcc: null };
       }
 
       const firstRecipient = recipients[0];
       const email = firstRecipient.emailAddress || firstRecipient;
-      const memberReceiveAcc = email.split('@')[0];
+      const memberReceiveAcc = email ? email.split('@')[0] : null;
+
+      // 更新 UI 顯示
       const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
-        displayElement.textContent = email; // 顯示完整 email
+        displayElement.textContent = email || window.constants.getMessage('LOADING_RECIPIENT', 'zhTW');
       }
-      return memberReceiveAcc;
+
+      return { email, memberReceiveAcc };
     } catch {
-      window.errorHandler.showError('NO_RECIPIENT');
-      return null;
+      const displayElement = document.getElementById('recipientDisplay');
+      if (displayElement) {
+        displayElement.textContent = window.constants.getMessage('NO_RECIPIENT', 'zhTW');
+      }
+      return { email: null, memberReceiveAcc: null };
     }
+  };
+
+  /**
+   * 公開 API：強制更新收件人顯示（給其他模組呼叫）。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>}
+   * @public
+   */
+  const updateRecipientDisplay = async () => {
+    return await loadRecipientInfo();
   };
 
   /**
@@ -134,12 +149,14 @@
    * @public
    */
   const getRecipient = async () => {
-    return await loadRecipient();
+    const recipientInfo = await loadRecipientInfo();
+    return recipientInfo.memberReceiveAcc;
   };
 
   /**
    * 檢查 storage 狀態並導向對應 View。
-   * 順序：serverUrl → auth → isAuthenticated → loadRecipient → mainView。
+   * 修復：非阻塞導航，即使無收件人也進 MAIN View（收件人後續動態更新）。
+   * 順序：serverUrl → auth → isAuthenticated → MAIN View（收件人異步填入）。
    * @returns {Promise<void>}
    * @private
    */
@@ -165,11 +182,11 @@
         return;
       }
 
-      // 載入收件人並顯示 mainView
-      const memberReceiveAcc = await loadRecipient();
-      if (memberReceiveAcc) {
-        showView(window.constants.VIEWS.MAIN);
-      }
+      // 初始載入收件人（可能空白，後續事件補齊）
+      await loadRecipientInfo();
+      
+      // 無條件進 MAIN View，收件人動態更新
+      showView(window.constants.VIEWS.MAIN);
     } catch {
       window.errorHandler.handleAuthError('AUTH_EXPIRED');
     }
@@ -197,11 +214,28 @@
   const listenForThemeChanges = async () => {
     try {
       if (Office.context?.officeTheme?.addHandlerAsync) {
-        await promisifyOfficeCall((callback) => Office.context.officeTheme.addHandlerAsync(Office.EventType.ThemeChanged, applyTheme, callback));
+        await promisifyOfficeCall((callback) => 
+          Office.context.officeTheme.addHandlerAsync(
+            Office.EventType.ThemeChanged, 
+            applyTheme, 
+            callback
+          )
+        );
       }
     } catch {
       // 靜默處理：主題監聽失敗不影響核心功能
     }
+  };
+
+  /**
+   * 收件人變更事件處理：動態更新顯示。
+   * 修復收件人載入延遲問題。
+   * @param {Office.RecipientsChangedEventArgs} _event - 事件引數。
+   * @returns {Promise<void>}
+   * @private
+   */
+  const onRecipientsChanged = async (_event) => {
+    await loadRecipientInfo();
   };
 
   /**
@@ -239,7 +273,7 @@
 
   /**
    * 初始化 View Switcher。
-   * 包含：loading → 初始化文字/佔位符 → storage 檢查 → View 導航 + 主題套用/監聽 + 附件監聽。
+   * 包含：loading → 初始化文字/佔位符 → 主題監聽 → 收件人/附件事件監聽 → storage 檢查 → MAIN View。
    */
   Office.initialize = async () => {
     // 初始 loading
@@ -253,10 +287,34 @@
     applyTheme();
     await listenForThemeChanges();
 
-    // 設定附件監聽
-    Office.context.mailbox.item.addHandlerAsync(Office.EventType.AttachmentsChanged, onAttachmentsChanged);
+    // 新增：監聽收件人變更（修復顯示延遲）
+    try {
+      await promisifyOfficeCall((callback) => 
+        Office.context.mailbox.item.addHandlerAsync(
+          Office.EventType.RecipientsChanged, 
+          onRecipientsChanged, 
+          callback
+        )
+      );
+    } catch {
+    }
 
-    // 檢查並導航
+    // 設定附件監聽（25MB 自動觸發）
+    try {
+      await promisifyOfficeCall((callback) => 
+        Office.context.mailbox.item.addHandlerAsync(
+          Office.EventType.AttachmentsChanged, 
+          onAttachmentsChanged, 
+          callback
+        )
+      );
+    } catch {
+    }
+
+    // 初始載入收件人（可能空白）
+    await loadRecipientInfo();
+
+    // 檢查並導航（非阻塞）
     await checkStorageAndNavigate();
   };
 
@@ -265,5 +323,6 @@
     showView,
     getRecipient,
     showSuccess,
+    updateRecipientDisplay, // 新增：公開 API 給其他模組
   };
 })();

@@ -1,7 +1,6 @@
 /**
  * APX.AI Outlook Error Handler。
  * 單一職責：集中處理所有錯誤顯示與認證清除邏輯。
- * 所有錯誤透過 viewSwitcher.showError 導向 Error View。
  * 認證錯誤自動清除 window.apxStorage。
  * 錯誤文字來自 constants.getMessage(key, 'zhTW')。
  * @module outlook/error-handler

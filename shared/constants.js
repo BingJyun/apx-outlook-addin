@@ -89,6 +89,8 @@
         NO_LOGIN_DATA: '無登入資料，請先登入',
         DOWNLOAD_AUTH_FAILED: '下載失敗：帳號、密碼或私鑰檔案有誤',
         TASKPANE_OPEN_FAILED: '無法開啟安全傳送視窗，請檢查網路或重新嘗試。',
+        // 新增：收件人載入狀態
+        LOADING_RECIPIENT: '載入收件人中...',
         // UI
         PROCESSING: '處理中...',
         UPLOADING: '檔案上傳中...',
@@ -138,6 +140,8 @@
         NO_LOGIN_DATA: 'No login data, please log in first.',
         DOWNLOAD_AUTH_FAILED: 'Download failed: account, password, or private key file incorrect',
         TASKPANE_OPEN_FAILED: 'Failed to open secure send window, please check network or try again.',
+        // 新增：收件人載入狀態
+        LOADING_RECIPIENT: 'Loading recipient...',
         // UI
         PROCESSING: 'Processing...',
         UPLOADING: 'Uploading file...',
