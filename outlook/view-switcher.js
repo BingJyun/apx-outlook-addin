@@ -98,8 +98,10 @@
 
   /**
    * 讀取收件人資訊並顯示於 recipientDisplay。
-   * 使用 Office.context.mailbox.item.to.getAsync，取第一位 email 的本地部分。
-   * @returns {Promise<string|null>} memberReceiveAcc 或 null。
+   * 顯示完整 email。
+   * 使用 Office.context.mailbox.item.to.getAsync，取第一位收件人。
+   * @returns {Promise<string|null>} memberReceiveAcc（本地部分）或 null。
+   * @throws 無收件人時顯示錯誤訊息。
    * @private
    */
   const loadRecipient = async () => {
@@ -117,7 +119,7 @@
       const memberReceiveAcc = email.split('@')[0];
       const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
-        displayElement.textContent = memberReceiveAcc;
+        displayElement.textContent = email; // 顯示完整 email
       }
       return memberReceiveAcc;
     } catch {
@@ -127,7 +129,7 @@
   };
 
   /**
-   * 公開 API：取得收件人資訊（避免重複邏輯）。
+   * 公開 API：取得收件人本地部分（後端需求）。
    * @returns {Promise<string|null>} memberReceiveAcc 或 null。
    * @public
    */
