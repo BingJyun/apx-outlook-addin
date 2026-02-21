@@ -1,12 +1,49 @@
 /**
  * APX.AI Outlook Error Handler。
- * 單一職責：集中處理所有錯誤顯示與認證清除邏輯。
+ * 單一職責：集中處理所有錯誤顯示、認證清除邏輯與診斷日誌。
  * 認證錯誤自動清除 window.apxStorage。
  * 錯誤文字來自 constants.getMessage(key, 'zhTW')。
  * @module outlook/error-handler
  */
-(function() {
+(function () {
   'use strict';
+
+  /**
+   * 診斷日誌 ring buffer（記憶體內，最多保留 100 筆）。
+   * 未來可擴展為送到遠端 logging service。
+   * @type {Array<{timestamp: string, level: string, message: string, detail: *}>}
+   * @private
+   */
+  const _logs = [];
+  const MAX_LOG_ENTRIES = 100;
+
+  /**
+   * 記錄診斷日誌。
+   * 存入記憶體 ring buffer，不依賴 DevTools 開啟。
+   * 可透過 errorHandler.getLogs() 在 Console 取回所有日誌。
+   * @param {'info'|'warn'|'error'} level - 日誌等級。
+   * @param {string} message - 日誌訊息。
+   * @param {*} [detail] - 選填，附加細節（Error 物件、API 回應等）。
+   */
+  const log = (level, message, detail) => {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      detail: detail instanceof Error ? { name: detail.name, message: detail.message, stack: detail.stack } : detail,
+    };
+    _logs.push(entry);
+    if (_logs.length > MAX_LOG_ENTRIES) {
+      _logs.shift();
+    }
+  };
+
+  /**
+   * 取得所有診斷日誌（供 DevTools Console 呼叫）。
+   * 使用方式：在 Console 輸入 errorHandler.getLogs()
+   * @returns {Array} 日誌陣列。
+   */
+  const getLogs = () => [..._logs];
 
   /**
    * 顯示錯誤 View 並設定訊息。
@@ -15,6 +52,7 @@
    * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
    */
   const showError = (messageKey) => {
+    log('error', `showError: ${messageKey}`);
     // 設定錯誤訊息文字
     const errorElement = document.querySelector('[data-key="ERROR_MESSAGE"]');
     if (errorElement) {
@@ -37,21 +75,17 @@
       if (window.apxStorage && typeof window.apxStorage.remove === 'function') {
         await window.apxStorage.remove();
       }
-    } catch {
-      // 靜默處理：storage 清除失敗不影響錯誤顯示
+    } catch (err) {
+      log('warn', 'storage 清除失敗', err);
     }
     showError(messageKey);
   };
 
   // 暴露公開 API
   window.errorHandler = {
-    /**
-     * @see showError
-     */
     showError,
-    /**
-     * @see handleAuthError
-     */
     handleAuthError,
+    log,
+    getLogs,
   };
 })();

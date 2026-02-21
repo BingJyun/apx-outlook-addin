@@ -6,7 +6,7 @@
  * @module outlook/view-switcher
  */
 
-(function() {
+(function () {
   'use strict';
 
   /**
@@ -107,8 +107,13 @@
   const loadRecipientInfo = async () => {
     try {
       const item = Office.context.mailbox.item;
-      /** @type {Office.Recipients} */
+      if (!item || !item.to) {
+        window.errorHandler.log('warn', 'Office.context.mailbox.item 或 item.to 不存在');
+        return { email: null, memberReceiveAcc: null };
+      }
+      /** @type {Office.EmailAddressDetails[]} */
       const recipients = await promisifyOfficeCall((callback) => item.to.getAsync(callback));
+      window.errorHandler.log('info', '收件人 getAsync 結果', recipients);
 
       if (!recipients || recipients.length === 0) {
         return { email: null, memberReceiveAcc: null };
@@ -125,7 +130,8 @@
       }
 
       return { email, memberReceiveAcc };
-    } catch {
+    } catch (err) {
+      window.errorHandler.log('warn', 'loadRecipientInfo 錯誤', err);
       const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
         displayElement.textContent = window.constants.getMessage('NO_RECIPIENT', 'zhTW');
@@ -140,7 +146,25 @@
    * @public
    */
   const updateRecipientDisplay = async () => {
-    return await loadRecipientInfo();
+    return await loadRecipientInfoWithRetry();
+  };
+
+  /**
+   * 帶重試的收件人載入。
+   * 首次無收件人時延遲重試，解決 Outlook 尚未解析收件人的時序問題。
+   * @param {number} retries - 剩餘重試次數。
+   * @param {number} delay - 每次重試延遲（毫秒）。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>}
+   * @private
+   */
+  const loadRecipientInfoWithRetry = async (retries = 3, delay = 1000) => {
+    const result = await loadRecipientInfo();
+    if (!result.email && retries > 0) {
+      window.errorHandler.log('info', `收件人為空，${delay}ms 後重試 (剩餘 ${retries} 次)`);
+      await new Promise((r) => setTimeout(r, delay));
+      return loadRecipientInfoWithRetry(retries - 1, delay);
+    }
+    return result;
   };
 
   /**
@@ -149,7 +173,7 @@
    * @public
    */
   const getRecipient = async () => {
-    const recipientInfo = await loadRecipientInfo();
+    const recipientInfo = await loadRecipientInfoWithRetry();
     return recipientInfo.memberReceiveAcc;
   };
 
@@ -182,9 +206,9 @@
         return;
       }
 
-      // 初始載入收件人（可能空白，後續事件補齊）
-      await loadRecipientInfo();
-      
+      // 初始載入收件人（帶重試，後續事件補齊）
+      await loadRecipientInfoWithRetry();
+
       // 無條件進 MAIN View，收件人動態更新
       showView(window.constants.VIEWS.MAIN);
     } catch {
@@ -214,10 +238,10 @@
   const listenForThemeChanges = async () => {
     try {
       if (Office.context?.officeTheme?.addHandlerAsync) {
-        await promisifyOfficeCall((callback) => 
+        await promisifyOfficeCall((callback) =>
           Office.context.officeTheme.addHandlerAsync(
-            Office.EventType.ThemeChanged, 
-            applyTheme, 
+            Office.EventType.ThemeChanged,
+            applyTheme,
             callback
           )
         );
@@ -275,7 +299,9 @@
    * 初始化 View Switcher。
    * 包含：loading → 初始化文字/佔位符 → 主題監聽 → 收件人/附件事件監聽 → storage 檢查 → MAIN View。
    */
-  Office.initialize = async () => {
+  Office.onReady(async (info) => {
+    window.errorHandler.log('info', 'Office.onReady 完成', { host: info.host, platform: info.platform });
+
     // 初始 loading
     showView(window.constants.VIEWS.LOADING);
 
@@ -287,36 +313,40 @@
     applyTheme();
     await listenForThemeChanges();
 
-    // 新增：監聽收件人變更（修復顯示延遲）
+    // 新增：監聽收件人變更（需要 Mailbox 1.7）
     try {
-      await promisifyOfficeCall((callback) => 
+      await promisifyOfficeCall((callback) =>
         Office.context.mailbox.item.addHandlerAsync(
-          Office.EventType.RecipientsChanged, 
-          onRecipientsChanged, 
+          Office.EventType.RecipientsChanged,
+          onRecipientsChanged,
           callback
         )
       );
-    } catch {
+      window.errorHandler.log('info', 'RecipientsChanged 事件監聽註冊成功');
+    } catch (e) {
+      window.errorHandler.log('warn', 'RecipientsChanged 事件註冊失敗 (需要 Mailbox 1.7)', e);
     }
 
     // 設定附件監聽（25MB 自動觸發）
     try {
-      await promisifyOfficeCall((callback) => 
+      await promisifyOfficeCall((callback) =>
         Office.context.mailbox.item.addHandlerAsync(
-          Office.EventType.AttachmentsChanged, 
-          onAttachmentsChanged, 
+          Office.EventType.AttachmentsChanged,
+          onAttachmentsChanged,
           callback
         )
       );
-    } catch {
+      window.errorHandler.log('info', 'AttachmentsChanged 事件監聽註冊成功');
+    } catch (e) {
+      window.errorHandler.log('warn', 'AttachmentsChanged 事件註冊失敗', e);
     }
 
-    // 初始載入收件人（可能空白）
-    await loadRecipientInfo();
+    // 初始載入收件人（帶重試，解決時序問題）
+    await loadRecipientInfoWithRetry();
 
     // 檢查並導航（非阻塞）
     await checkStorageAndNavigate();
-  };
+  });
 
   // 暴露公開 API
   window.viewSwitcher = {
