@@ -27,6 +27,20 @@
             display: block;
             margin: 0 auto;
         }
+
+        .btn-password-toggle {
+            border-color: var(--bs-border-color);
+            background-color: transparent !important;
+            color: var(--bs-body-color);
+        }
+
+        .btn-password-toggle:hover,
+        .btn-password-toggle:active,
+        .btn-password-toggle:focus {
+            border-color: var(--bs-border-color) !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
     </style>
 </head>
 
@@ -50,7 +64,7 @@
         <div class="input-group mb-3">
             <input type="password" id="loginPwd" class="form-control" placeholder=""
                 data-placeholder-key="LOGIN_PASSWORD_PLACEHOLDER">
-            <button type="button" id="loginPwdToggle" class="btn btn-outline-secondary">
+            <button type="button" id="loginPwdToggle" class="btn btn-password-toggle">
                 <i id="loginPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
@@ -65,7 +79,7 @@
         <div class="input-group mb-3">
             <input type="password" id="pemPwdInput" class="form-control" placeholder=""
                 data-placeholder-key="PRIVATE_KEY_PASSWORD_PLACEHOLDER">
-            <button type="button" id="pemPwdToggle" class="btn btn-outline-secondary">
+            <button type="button" id="pemPwdToggle" class="btn btn-password-toggle">
                 <i id="pemPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
