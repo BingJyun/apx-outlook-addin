@@ -1,27 +1,43 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>APX.AI 安全傳送</title>
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .eye-toggle { border: none; background: none; padding: 0; }
-        .view { display: none; }
-        .view.active { display: block; }
-        .logo { height: 100px; display: block; margin: 0 auto; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .logo {
+            height: 100px;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
+
 <body class="p-3">
     <!-- Server URL Input View -->
     <div id="serverInputView" class="view active" data-view="serverInputView">
         <img src="../icons/icon80.png" alt="APX.AI Logo" class="logo mb-3">
         <h5 class="mb-3 text-center" data-key="SERVER_URL_TITLE"></h5>
         <p class="small text-muted mb-3" data-key="SERVER_URL_DESCRIPTION"></p>
-        <input type="url" id="serverUrlInput" class="form-control mb-3" placeholder="" data-placeholder-key="SERVER_URL_PLACEHOLDER">
+        <input type="url" id="serverUrlInput" class="form-control mb-3" placeholder=""
+            data-placeholder-key="SERVER_URL_PLACEHOLDER">
         <button id="continueBtn" class="btn btn-primary w-100" data-key="CONTINUE_BUTTON"></button>
     </div>
 
@@ -29,10 +45,12 @@
     <div id="loginView" class="view" data-view="loginView">
         <img src="../icons/icon80.png" alt="APX.AI Logo" class="logo mb-3">
         <h5 class="mb-3 text-center" data-key="LOGIN_TITLE"></h5>
-        <input type="text" id="loginAcc" class="form-control mb-3" placeholder="" data-placeholder-key="LOGIN_ACCOUNT_PLACEHOLDER">
+        <input type="text" id="loginAcc" class="form-control mb-3" placeholder=""
+            data-placeholder-key="LOGIN_ACCOUNT_PLACEHOLDER">
         <div class="input-group mb-3">
-            <input type="password" id="loginPwd" class="form-control" placeholder="" data-placeholder-key="LOGIN_PASSWORD_PLACEHOLDER">
-            <button type="button" id="loginPwdToggle" class="btn eye-toggle">
+            <input type="password" id="loginPwd" class="form-control" placeholder=""
+                data-placeholder-key="LOGIN_PASSWORD_PLACEHOLDER">
+            <button type="button" id="loginPwdToggle" class="btn btn-outline-secondary">
                 <i id="loginPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
@@ -45,8 +63,9 @@
         <h5 class="mb-3 text-center" data-key="PRIVATE_KEY_TITLE"></h5>
         <input type="file" id="pemFileInput" class="form-control mb-3" accept=".pem">
         <div class="input-group mb-3">
-            <input type="password" id="pemPwdInput" class="form-control" placeholder="" data-placeholder-key="PRIVATE_KEY_PASSWORD_PLACEHOLDER">
-            <button type="button" id="pemPwdToggle" class="btn eye-toggle">
+            <input type="password" id="pemPwdInput" class="form-control" placeholder=""
+                data-placeholder-key="PRIVATE_KEY_PASSWORD_PLACEHOLDER">
+            <button type="button" id="pemPwdToggle" class="btn btn-outline-secondary">
                 <i id="pemPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
@@ -56,8 +75,10 @@
     <!-- Main View -->
     <div id="mainView" class="view" data-view="mainView">
         <img src="../icons/icon80.png" alt="APX.AI Logo" class="logo mb-3">
-        <button id="logoutBtn" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0" data-key="LOGOUT_BUTTON"></button>
-        <button id="refreshBtn" class="btn btn-sm btn-outline-secondary position-absolute end-0" style="top: 38px;" data-key="REFRESH_BUTTON"></button>
+        <button id="logoutBtn" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0"
+            data-key="LOGOUT_BUTTON"></button>
+        <button id="refreshBtn" class="btn btn-sm btn-outline-secondary position-absolute end-0" style="top: 38px;"
+            data-key="REFRESH_BUTTON"></button>
         <h5 class="text-center m-0" data-key="MAIN_TITLE"></h5>
         <p class="small text-muted"><span data-key="RECIPIENT_LABEL"></span><span id="recipientDisplay"></span></p>
         <input type="file" id="fileInput" class="form-control mb-3">
@@ -80,7 +101,9 @@
         <div class="alert alert-danger" data-key="ERROR_MESSAGE"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 
     <!-- 依賴順序載入所有共用與 Outlook 專屬模組 -->
     <script src="../shared/constants.js"></script>
@@ -96,4 +119,5 @@
     <script src="./auth-handler.js"></script>
     <script src="./view-switcher.js"></script>
 </body>
+
 </html>
