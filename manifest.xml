@@ -11,8 +11,8 @@
   <DefaultLocale>zh-TW</DefaultLocale>
   <DisplayName DefaultValue="APX.AI 安全傳送"/>
   <Description DefaultValue="使用 APX.AI 安全傳送大型附件，保護企業機密資料。"/>
-  <IconUrl DefaultValue="https://bingjyun.github.io/apx-outlook-addin/icons/icon80.png"/>
-  <HighResolutionIconUrl DefaultValue="https://bingjyun.github.io/apx-outlook-addin/icons/icon80.png"/>
+  <IconUrl DefaultValue="https://bingjyun.github.io/apx-outlook-addin/icons/icon64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://bingjyun.github.io/apx-outlook-addin/icons/icon128.png"/>
   <SupportUrl DefaultValue="https://www.ioneit.com/index.html"/>
   <AppDomains>
     <AppDomain>https://apxpoc.ioneit.com</AppDomain>
