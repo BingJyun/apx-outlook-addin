@@ -6,6 +6,20 @@
 
 (function() {
   /**
+   * View 名稱常數（避免 magic string）。
+   * @enum {string}
+   */
+  const VIEWS = {
+    SERVER_INPUT: 'serverInputView',
+    LOGIN: 'loginView',
+    PRIVATE_KEY: 'privateKeyView',
+    MAIN: 'mainView',
+    LOADING: 'loadingView',
+    ERROR: 'errorView',
+    SUCCESS: 'successView',
+  };
+
+  /**
    * API 端點常數（統一，未來 Outlook 可擴展）。
    */
   const API_ENDPOINTS = {
@@ -55,7 +69,7 @@
   /**
    * i18n 中英（台灣用語），從 storage 載語言碼切換。
    * @param {string} key - 訊息鍵。
-   * @param {string} language - 'zhTW' | 'enUS'。
+   * @param {string} language - 'zhTW' | 'en-US'。
    * @returns {string} 訊息。
    */
   const getMessage = (key, language = 'zhTW') => {
@@ -64,7 +78,10 @@
         // 錯誤
         UPLOAD_FAILED: '上傳失敗：HTTP {status} - {error}',
         DOWNLOAD_INIT_FAILED: '下載初始化失敗：HTTP {status} - {error}',
+        EMPTY_SERVER_URL: '請輸入伺服器 URL',
         AUTH_EXPIRED: '認證資訊已過期或無效，請重新登入。',
+        NO_PRIVATE_KEY_FILE: '請選擇私鑰檔案',
+        EMPTY_PRIVATE_KEY_PASSWORD: '請輸入私鑰密碼',
         NO_RECIPIENT: '無法讀取有效的收件人 Email，請確認已在收件人欄位填寫。',
         FILE_TOO_LARGE: '檔案 "{name}" ({size} MB) 已超過 25MB 上限，將透過 APX.AI 安全傳送。',
         TIMEOUT: '下載逾時，伺服器處理過久。',
@@ -72,6 +89,8 @@
         NO_LOGIN_DATA: '無登入資料，請先登入',
         DOWNLOAD_AUTH_FAILED: '下載失敗：帳號、密碼或私鑰檔案有誤',
         TASKPANE_OPEN_FAILED: '無法開啟安全傳送視窗，請檢查網路或重新嘗試。',
+        // 新增：收件人載入狀態
+        LOADING_RECIPIENT: '載入收件人中...',
         // UI
         PROCESSING: '處理中...',
         UPLOADING: '檔案上傳中...',
@@ -102,12 +121,18 @@
         LOADING_TEXT: '載入中',
         PROCESSING_TEXT: '處理中...',
         ERROR_MESSAGE: '錯誤訊息',
+        // 新增連結訊息鍵
+        UPLOAD_LINK_PREFIX: '此檔案透過 APX.AI 安全傳送：',
+        UPLOAD_LINK_BODY: '{fileName} - <a href="{baseUrl}" target="_blank">點此到 APX.AI 下載</a>（建議使用 Chrome 瀏覽器開啟）',
       },
       enUS: {
         // Errors
         UPLOAD_FAILED: 'Upload failed: HTTP {status} - {error}',
         DOWNLOAD_INIT_FAILED: 'Download init failed: HTTP {status} - {error}',
+        EMPTY_SERVER_URL: 'Please enter server URL',
         AUTH_EXPIRED: 'Auth expired or invalid, please log in again.',
+        NO_PRIVATE_KEY_FILE: 'Please select private key file',
+        EMPTY_PRIVATE_KEY_PASSWORD: 'Please enter private key password',
         NO_RECIPIENT: 'Cannot read valid recipient email. Please fill in the recipient field.',
         FILE_TOO_LARGE: 'File "{name}" ({size} MB) exceeds 25MB limit, use APX.AI secure send.',
         TIMEOUT: 'Download timeout, server too slow.',
@@ -115,6 +140,8 @@
         NO_LOGIN_DATA: 'No login data, please log in first.',
         DOWNLOAD_AUTH_FAILED: 'Download failed: account, password, or private key file incorrect',
         TASKPANE_OPEN_FAILED: 'Failed to open secure send window, please check network or try again.',
+        // 新增：收件人載入狀態
+        LOADING_RECIPIENT: 'Loading recipient...',
         // UI
         PROCESSING: 'Processing...',
         UPLOADING: 'Uploading file...',
@@ -145,6 +172,9 @@
         LOADING_TEXT: 'Loading',
         PROCESSING_TEXT: 'Processing...',
         ERROR_MESSAGE: 'Error Message',
+        // 新增連結訊息鍵
+        UPLOAD_LINK_PREFIX: 'This file is sent securely via APX.AI:',
+        UPLOAD_LINK_BODY: '{fileName} - <a href="{baseUrl}" target="_blank">Click here to download from APX.AI</a> (Chrome browser recommended)',
       },
     };
     const msg = messages[language]?.[key] || key;
@@ -161,6 +191,7 @@
 
   // Global 暴露（Chrome 相容，Outlook import）
   window.constants = {
+    VIEWS,
     API_ENDPOINTS,
     DEFAULTS,
     STORAGE_KEYS,

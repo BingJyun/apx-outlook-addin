@@ -1,34 +1,62 @@
 /**
  * APX.AI Outlook View Switcher。
- * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配。
+ * 單一職責：集中管理 View 切換、初始導航、收件人讀取、Office 主題適配、附件監聽。
  * 所有 Office.js 呼叫包在 Office.initialize 內。
- * 公開 API：showView(viewName)、showError(messageKey)。
+ * 公開 API：showView(viewName)、showSuccess(messageKey)、getRecipient()、updateRecipientDisplay()。
  * @module outlook/view-switcher
  */
 
-(function() {
+(function () {
   'use strict';
 
   /**
-   * View 名稱常數（避免 magic string）。
-   * @enum {string}
+   * 將 Office.js callback 風格轉換為 Promise。
+   * @param {Function} officeCall - Office.js API 呼叫函數。
+   * @returns {Promise} Promise 化的結果。
+   * @private
    */
-  const VIEWS = {
-    SERVER_INPUT: 'serverInputView',
-    LOGIN: 'loginView',
-    PRIVATE_KEY: 'privateKeyView',
-    MAIN: 'mainView',
-    LOADING: 'loadingView',
-    ERROR: 'errorView',
+  const promisifyOfficeCall = (officeCall) => {
+    return new Promise((resolve, reject) => {
+      officeCall((result) => {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+          resolve(result.value);
+        } else {
+          reject(new Error(`Office API 呼叫失敗：${result.error.message}`));
+        }
+      });
+    });
   };
 
   /**
-   * DOM 元素 ID 常數（避免 magic string）。
-   * @enum {string}
+   * 初始化所有 [data-key] 元素的文字內容。
+   * 使用 constants.getMessage(key, 'zhTW') 設定 textContent。
+   * @returns {void}
+   * @private
    */
-  const ELEMENTS = {
-    RECIPIENT_DISPLAY: 'recipientDisplay',
-    ERROR_MESSAGE: 'errorMessage',
+  const initTexts = () => {
+    const elements = document.querySelectorAll('[data-key]');
+    elements.forEach((element) => {
+      const key = element.getAttribute('data-key');
+      if (key) {
+        element.textContent = window.constants.getMessage(key, 'zhTW');
+      }
+    });
+  };
+
+  /**
+   * 初始化所有 [data-placeholder-key] 元素的 placeholder。
+   * 使用 constants.getMessage(key, 'zhTW') 設定 placeholder。
+   * @returns {void}
+   * @private
+   */
+  const initPlaceholders = () => {
+    const elements = document.querySelectorAll('[data-placeholder-key]');
+    elements.forEach((element) => {
+      const key = element.getAttribute('data-placeholder-key');
+      if (key) {
+        element.placeholder = window.constants.getMessage(key, 'zhTW');
+      }
+    });
   };
 
   /**
@@ -43,72 +71,116 @@
 
   /**
    * 顯示指定 View。
-   * @param {string} viewName - View 名稱（來自 VIEWS）。
+   * @param {string} viewName - View 名稱（來自 constants.VIEWS）。
    * @public
    */
   const showView = (viewName) => {
     hideAllViews();
     const view = document.querySelector(`[data-view="${viewName}"]`);
     if (view) {
+      view.classList.add('active');
       view.style.display = 'block';
     }
   };
 
   /**
-   * 顯示錯誤 View 並設定訊息。
-   * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
+   * 顯示成功 View 並設定訊息。
+   * 直接使用 constants.getMessage(key, 'zhTW') 設定 textContent。
+   * @param {string} messageKey - 成功訊息鍵值（來自 constants.MESSAGES）。
    * @public
    */
-  const showError = (messageKey) => {
-    const errorElement = document.getElementById(ELEMENTS.ERROR_MESSAGE);
-    if (errorElement) {
-      errorElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
+  const showSuccess = (messageKey) => {
+    const successElement = document.querySelector('[data-key="SUCCESS_MESSAGE"]');
+    if (successElement) {
+      successElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
     }
-    showView(VIEWS.ERROR);
+    showView(window.constants.VIEWS.SUCCESS);
   };
 
   /**
-   * 讀取收件人資訊並顯示於 recipientDisplay。
-   * 使用 Office.context.mailbox.item.to.getAsync，取第一位 email 的本地部分。
-   * @returns {Promise<boolean>} 成功讀取為 true，否則 false。
+   * 讀取收件人資訊並更新顯示。
+   * 取第一位收件人的完整 email 顯示於 recipientDisplay。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>} 收件人資訊。
+   * @throws 無收件人時返回 null，不拋錯。
    * @private
    */
-  const loadRecipient = async () => {
+  const loadRecipientInfo = async () => {
     try {
       const item = Office.context.mailbox.item;
-      /** @type {Office.Recipients} */
-      const recipients = await new Promise((resolve, reject) => {
-        item.to.getAsync((result) => {
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
-            resolve(result.value);
-          } else {
-            reject(new Error(`收件人讀取失敗：${result.error.message}`));
-          }
-        });
-      });
+      if (!item || !item.to) {
+        window.errorHandler.log('warn', 'Office.context.mailbox.item 或 item.to 不存在');
+        return { email: null, memberReceiveAcc: null };
+      }
+      /** @type {Office.EmailAddressDetails[]} */
+      const recipients = await promisifyOfficeCall((callback) => item.to.getAsync(callback));
+      window.errorHandler.log('info', '收件人 getAsync 結果', recipients);
 
       if (!recipients || recipients.length === 0) {
-        window.errorHandler.showError('NO_RECIPIENT');
-        return false;
+        return { email: null, memberReceiveAcc: null };
       }
 
       const firstRecipient = recipients[0];
       const email = firstRecipient.emailAddress || firstRecipient;
-      const memberReceiveAcc = email.split('@')[0];
-      const displayElement = document.getElementById(ELEMENTS.RECIPIENT_DISPLAY);
+      const memberReceiveAcc = email ? email.split('@')[0] : null;
+
+      // 更新 UI 顯示
+      const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
-        displayElement.textContent = memberReceiveAcc;
+        displayElement.textContent = email || window.constants.getMessage('LOADING_RECIPIENT', 'zhTW');
       }
-      return true;
-    } catch {
-      window.errorHandler.showError('NO_RECIPIENT');
-      return false;
+
+      return { email, memberReceiveAcc };
+    } catch (err) {
+      window.errorHandler.log('warn', 'loadRecipientInfo 錯誤', err);
+      const displayElement = document.getElementById('recipientDisplay');
+      if (displayElement) {
+        displayElement.textContent = window.constants.getMessage('NO_RECIPIENT', 'zhTW');
+      }
+      return { email: null, memberReceiveAcc: null };
     }
   };
 
   /**
+   * 公開 API：強制更新收件人顯示（給其他模組呼叫）。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>}
+   * @public
+   */
+  const updateRecipientDisplay = async () => {
+    return await loadRecipientInfoWithRetry();
+  };
+
+  /**
+   * 帶重試的收件人載入。
+   * 首次無收件人時延遲重試，解決 Outlook 尚未解析收件人的時序問題。
+   * @param {number} retries - 剩餘重試次數。
+   * @param {number} delay - 每次重試延遲（毫秒）。
+   * @returns {Promise<{email: string|null, memberReceiveAcc: string|null}>}
+   * @private
+   */
+  const loadRecipientInfoWithRetry = async (retries = 3, delay = 1000) => {
+    const result = await loadRecipientInfo();
+    if (!result.email && retries > 0) {
+      window.errorHandler.log('info', `收件人為空，${delay}ms 後重試 (剩餘 ${retries} 次)`);
+      await new Promise((r) => setTimeout(r, delay));
+      return loadRecipientInfoWithRetry(retries - 1, delay);
+    }
+    return result;
+  };
+
+  /**
+   * 公開 API：取得收件人本地部分（後端需求）。
+   * @returns {Promise<string|null>} memberReceiveAcc 或 null。
+   * @public
+   */
+  const getRecipient = async () => {
+    const recipientInfo = await loadRecipientInfoWithRetry();
+    return recipientInfo.memberReceiveAcc;
+  };
+
+  /**
    * 檢查 storage 狀態並導向對應 View。
-   * 順序：serverUrl → auth → isAuthenticated → loadRecipient → mainView。
+   * 修復：非阻塞導航，即使無收件人也進 MAIN View（收件人後續動態更新）。
+   * 順序：serverUrl → auth → isAuthenticated → MAIN View（收件人異步填入）。
    * @returns {Promise<void>}
    * @private
    */
@@ -117,34 +189,30 @@
       // 檢查 serverUrl
       const serverUrlData = await window.apxStorage.loadServerUrl();
       if (!serverUrlData?.url) {
-        showView(VIEWS.SERVER_INPUT);
+        showView(window.constants.VIEWS.SERVER_INPUT);
         return;
       }
 
       // 檢查 auth
       const authData = await window.apxStorage.load();
       if (!authData?.account || !authData?.password) {
-        showView(VIEWS.LOGIN);
+        showView(window.constants.VIEWS.LOGIN);
         return;
       }
 
       // 檢查 private key 驗證
       if (!authData.isAuthenticated) {
-        showView(VIEWS.PRIVATE_KEY);
+        showView(window.constants.VIEWS.PRIVATE_KEY);
         return;
       }
 
-      // 載入收件人並顯示 mainView
-      const recipientLoaded = await loadRecipient();
-      if (recipientLoaded) {
-        showView(VIEWS.MAIN);
-      }
+      // 初始載入收件人（帶重試，後續事件補齊）
+      await loadRecipientInfoWithRetry();
+
+      // 無條件進 MAIN View，收件人動態更新
+      showView(window.constants.VIEWS.MAIN);
     } catch {
-      if (window.errorHandler?.handleAuthError) {
-        window.errorHandler.handleAuthError('AUTH_EXPIRED');
-      } else {
-        showError('AUTH_EXPIRED');
-      }
+      window.errorHandler.handleAuthError('AUTH_EXPIRED');
     }
   };
 
@@ -170,9 +238,12 @@
   const listenForThemeChanges = async () => {
     try {
       if (Office.context?.officeTheme?.addHandlerAsync) {
-        await Office.context.officeTheme.addHandlerAsync(
-          Office.EventType.ThemeChanged,
-          applyTheme
+        await promisifyOfficeCall((callback) =>
+          Office.context.officeTheme.addHandlerAsync(
+            Office.EventType.ThemeChanged,
+            applyTheme,
+            callback
+          )
         );
       }
     } catch {
@@ -181,24 +252,107 @@
   };
 
   /**
-   * 初始化 View Switcher。
-   * 包含：loading → storage 檢查 → View 導航 + 主題套用/監聽。
+   * 收件人變更事件處理：動態更新顯示。
+   * 修復收件人載入延遲問題。
+   * @param {Office.RecipientsChangedEventArgs} _event - 事件引數。
+   * @returns {Promise<void>}
+   * @private
    */
-  Office.initialize = async () => {
+  const onRecipientsChanged = async (_event) => {
+    await loadRecipientInfo();
+  };
+
+  /**
+   * 附件變更事件處理。
+   * 檢查單一附件是否超過閾值，若是則移除並開啟 Taskpane。
+   * @param {Office.AttachmentsChangedEventArgs} _event - 事件引數（未使用）。
+   * @returns {Promise<void>}
+   * @private
+   */
+  const onAttachmentsChanged = async (_event) => {
+    const item = Office.context.mailbox.item;
+    const attachments = await promisifyOfficeCall((callback) => item.attachments.getAsync(callback));
+
+    if (attachments.length === 1) {
+      const attachment = attachments[0];
+      if (attachment.size > window.constants.DEFAULTS.MAX_FILE_SIZE_BYTES) {
+        await promisifyOfficeCall((callback) => item.removeAttachmentAsync(attachment.id, callback));
+        const taskpaneUrl = `${window.location.protocol}//${window.location.host}/taskpane.html`;
+        await new Promise((resolve, reject) => {
+          Office.context.ui.displayDialogAsync(taskpaneUrl, {
+            height: window.constants.DEFAULTS.DIALOG_HEIGHT_PERCENT,
+            width: window.constants.DEFAULTS.DIALOG_WIDTH_PERCENT,
+            displayInIframe: true
+          }, (asyncResult) => {
+            if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+              resolve();
+            } else {
+              reject(asyncResult.error);
+            }
+          });
+        });
+      }
+    }
+  };
+
+  /**
+   * 初始化 View Switcher。
+   * 包含：loading → 初始化文字/佔位符 → 主題監聽 → 收件人/附件事件監聽 → storage 檢查 → MAIN View。
+   */
+  Office.onReady(async (info) => {
+    window.errorHandler.log('info', 'Office.onReady 完成', { host: info.host, platform: info.platform });
+
     // 初始 loading
-    showView(VIEWS.LOADING);
+    showView(window.constants.VIEWS.LOADING);
+
+    // 初始化文字和佔位符
+    initTexts();
+    initPlaceholders();
 
     // 套用初始主題並監聽變更
     applyTheme();
     await listenForThemeChanges();
 
-    // 檢查並導航
+    // 新增：監聽收件人變更（需要 Mailbox 1.7）
+    try {
+      await promisifyOfficeCall((callback) =>
+        Office.context.mailbox.item.addHandlerAsync(
+          Office.EventType.RecipientsChanged,
+          onRecipientsChanged,
+          callback
+        )
+      );
+      window.errorHandler.log('info', 'RecipientsChanged 事件監聽註冊成功');
+    } catch (e) {
+      window.errorHandler.log('warn', 'RecipientsChanged 事件註冊失敗 (需要 Mailbox 1.7)', e);
+    }
+
+    // 設定附件監聽（25MB 自動觸發）
+    try {
+      await promisifyOfficeCall((callback) =>
+        Office.context.mailbox.item.addHandlerAsync(
+          Office.EventType.AttachmentsChanged,
+          onAttachmentsChanged,
+          callback
+        )
+      );
+      window.errorHandler.log('info', 'AttachmentsChanged 事件監聽註冊成功');
+    } catch (e) {
+      window.errorHandler.log('warn', 'AttachmentsChanged 事件註冊失敗', e);
+    }
+
+    // 初始載入收件人（帶重試，解決時序問題）
+    await loadRecipientInfoWithRetry();
+
+    // 檢查並導航（非阻塞）
     await checkStorageAndNavigate();
-  };
+  });
 
   // 暴露公開 API
   window.viewSwitcher = {
     showView,
-    showError,
+    getRecipient,
+    showSuccess,
+    updateRecipientDisplay, // 新增：公開 API 給其他模組
   };
 })();

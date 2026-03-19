@@ -278,12 +278,23 @@
   };
 
   /**
+   * 正規化 baseUrl，去除 trailing slash。
+   * @param {string} rawUrl
+   * @returns {string}
+   * @private
+   */
+  const normalizeBaseUrl = (rawUrl) => {
+    return (rawUrl || window.constants.DEFAULTS.API_BASE_URL).replace(/\/$/, '');
+  };
+
+  /**
    * 儲存伺服器 URL。
    * @param {string} url - 伺服器 URL。
    * @returns {Promise<void>}
    */
   const saveServerUrl = async (url) => {
-    await saveWithExpiry(window.constants.STORAGE_KEYS.SERVER_URL, { url });
+    const normalizedUrl = normalizeBaseUrl(url);
+    await saveWithExpiry(window.constants.STORAGE_KEYS.SERVER_URL, { url: normalizedUrl });
   };
 
   /**

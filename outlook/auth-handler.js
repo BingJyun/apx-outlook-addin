@@ -22,15 +22,15 @@
 
       const url = serverUrlInput.value.trim();
       if (!url) {
-        window.errorHandler.showError('SERVER_URL_TITLE');
+        window.errorHandler.showError('EMPTY_SERVER_URL');
         return;
       }
 
       try {
         await window.apxStorage.saveServerUrl(url);
-        window.viewSwitcher.showView('loginView');
+        window.viewSwitcher.showView(window.constants.VIEWS.LOGIN);
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -58,9 +58,9 @@
 
       try {
         await window.apxStorage.saveCredentials(account, password);
-        window.viewSwitcher.showView('privateKeyView');
+        window.viewSwitcher.showView(window.constants.VIEWS.PRIVATE_KEY);
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -79,18 +79,24 @@
       if (!pemFileInput || !pemPwdInput) {return;}
 
       const file = pemFileInput.files[0];
+      const pemPwd = pemPwdInput.value.trim();
 
       if (!file) {
-        window.errorHandler.showError('PRIVATE_KEY_TITLE');
+        window.errorHandler.showError('NO_PRIVATE_KEY_FILE');
+        return;
+      }
+
+      if (!pemPwd) {
+        window.errorHandler.showError('EMPTY_PRIVATE_KEY_PASSWORD');
         return;
       }
 
       try {
         const pemContent = await file.text();
         await window.apxStorage.verifyPrivateKey(pemContent);
-        window.viewSwitcher.showView('mainView');
+        window.viewSwitcher.showView(window.constants.VIEWS.MAIN);
       } catch {
-        window.errorHandler.showError('DOWNLOAD_AUTH_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -106,9 +112,9 @@
     logoutBtn.addEventListener('click', async () => {
       try {
         await window.apxStorage.remove();
-        window.viewSwitcher.showView('loginView');
+        window.viewSwitcher.showView(window.constants.VIEWS.LOGIN);
       } catch {
-        window.errorHandler.showError('UPLOAD_FAILED');
+        window.errorHandler.handleAuthError('AUTH_EXPIRED');
       }
     });
   };
@@ -121,8 +127,7 @@
    */
   const bindPasswordToggle = (inputId, toggleId, iconId) => {
     const toggleBtn = document.getElementById(toggleId);
-    const icon = document.getElementById(iconId);
-    if (!toggleBtn || !icon) {return;}
+    if (!toggleBtn) {return;}
 
     toggleBtn.addEventListener('click', () => {
       const input = document.getElementById(inputId);
@@ -130,7 +135,10 @@
 
       const isVisible = input.type === 'text';
       input.type = isVisible ? 'password' : 'text';
-      icon.className = isVisible ? window.constants.STYLES.PASSWORD_TOGGLE_HIDDEN : window.constants.STYLES.PASSWORD_TOGGLE_VISIBLE;
+      const icon = document.getElementById(iconId);
+      if (icon) {
+        icon.className = isVisible ? window.constants.STYLES.PASSWORD_TOGGLE_HIDDEN : window.constants.STYLES.PASSWORD_TOGGLE_VISIBLE;
+      }
     });
   };
 
