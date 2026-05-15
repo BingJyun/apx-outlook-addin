@@ -48,11 +48,17 @@
     <!-- Server URL Input View -->
     <div id="serverInputView" class="view active" data-view="serverInputView">
         <img src="../icons/icon80.png" alt="APX.AI Logo" class="logo mb-3">
-        <h5 class="mb-3 text-center" data-key="SERVER_URL_TITLE"></h5>
-        <p class="small text-muted mb-3" data-key="SERVER_URL_DESCRIPTION"></p>
+        <h5 class="mb-2 text-center" data-key="FRE_VALUE_TITLE"></h5>
+        <p class="small mb-2" data-key="FRE_VALUE_BODY"></p>
+        <p class="small text-muted mb-3" data-key="FRE_GET_STARTED"></p>
         <input type="url" id="serverUrlInput" class="form-control mb-3" placeholder=""
             data-placeholder-key="SERVER_URL_PLACEHOLDER">
-        <button id="continueBtn" class="btn btn-primary w-100" data-key="CONTINUE_BUTTON"></button>
+        <button id="continueBtn" class="btn btn-primary w-100 mb-3" data-key="CONTINUE_BUTTON"></button>
+        <p class="small text-center mb-2">
+            <span data-key="SIGN_UP_PROMPT"></span>
+            <a id="signUpLinkServer" href="#" target="_blank" rel="noopener noreferrer" data-key="SIGN_UP_LINK_TEXT"></a>
+        </p>
+        <p class="small text-muted text-center" data-key="ENTERPRISE_NOTE"></p>
     </div>
 
     <!-- Login View -->
@@ -68,7 +74,11 @@
                 <i id="loginPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
-        <button id="loginBtn" class="btn btn-primary w-100" data-key="LOGIN_BUTTON"></button>
+        <button id="loginBtn" class="btn btn-primary w-100 mb-3" data-key="LOGIN_BUTTON"></button>
+        <p class="small text-center mb-0">
+            <span data-key="SIGN_UP_PROMPT"></span>
+            <a id="signUpLinkLogin" href="#" target="_blank" rel="noopener noreferrer" data-key="SIGN_UP_LINK_TEXT"></a>
+        </p>
     </div>
 
     <!-- Private Key Verification View -->

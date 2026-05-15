@@ -47,10 +47,10 @@
         return { status: pollStatus, originalFileName };
       } else if (pollStatus === "error") {
         // 立即在進度顯示錯誤訊息，讓用戶友好知道
-        onProgress(window.constants.getMessage('DOWNLOAD_AUTH_FAILED', 'zhTW'));
-        throw new Error(window.constants.getMessage('DOWNLOAD_AUTH_FAILED', 'zhTW'));
+        onProgress(window.constants.getMessage('DOWNLOAD_AUTH_FAILED'));
+        throw new Error(window.constants.getMessage('DOWNLOAD_AUTH_FAILED'));
       }
-      onProgress(window.constants.getMessage('SERVER_PROCESSING', 'zhTW')
+      onProgress(window.constants.getMessage('SERVER_PROCESSING')
     .replace('{status}', pollStatus || 'pending')
     .replace('{attempt}', i + 1)
     .replace('{max}', MAX_POLLS));

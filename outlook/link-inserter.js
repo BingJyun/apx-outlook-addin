@@ -16,7 +16,7 @@
 async function insertDownloadLink(fileName, baseUrl) {
   try {
     // 建構下載連結（僅使用 server baseUrl，無 taskId）
-    const linkHtml = `${window.constants.getMessage('UPLOAD_LINK_PREFIX', 'zhTW')}<br>${window.constants.getMessage('UPLOAD_LINK_BODY', 'zhTW').replace('{fileName}', fileName).replace('{baseUrl}', baseUrl)}`;
+    const linkHtml = `${window.constants.getMessage('UPLOAD_LINK_PREFIX')}<br>${window.constants.getMessage('UPLOAD_LINK_BODY').replace('{fileName}', fileName).replace('{baseUrl}', baseUrl)}`;
 
     // 使用 Office.js 插入連結到郵件本文
     await new Promise((resolve, reject) => {

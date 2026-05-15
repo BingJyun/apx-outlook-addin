@@ -2,7 +2,7 @@
  * APX.AI Outlook Error Handler。
  * 單一職責：集中處理所有錯誤顯示、認證清除邏輯與診斷日誌。
  * 認證錯誤自動清除 window.apxStorage。
- * 錯誤文字來自 constants.getMessage(key, 'zhTW')。
+ * 錯誤文字來自 constants.getMessage(key)。
  * @module outlook/error-handler
  */
 (function () {
@@ -56,7 +56,7 @@
     // 設定錯誤訊息文字
     const errorElement = document.querySelector('[data-key="ERROR_MESSAGE"]');
     if (errorElement) {
-      errorElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
+      errorElement.textContent = window.constants.getMessage(messageKey);
     }
     // 切換到錯誤 View（若 viewSwitcher 可用）
     if (window.viewSwitcher && typeof window.viewSwitcher.showView === 'function') {

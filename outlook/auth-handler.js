@@ -2,7 +2,7 @@
  * APX.AI Outlook Auth Handler。
  * 專責處理登入、登出、私鑰驗證與 storage 存取邏輯。
  * 驗證成功後呼叫 window.viewSwitcher 切換到 Main View。
- * 所有文字來自 constants.getMessage(key, 'zhTW')。
+ * 所有文字來自 constants.getMessage(key)（依 Office 顯示語言自動切換）。
  */
 
 (function() {
@@ -143,6 +143,18 @@
   };
 
   /**
+   * 將 Sign Up 連結的 href 從 constants.DEFAULTS.SIGN_UP_URL 注入，
+   * 避免 URL magic string 同時出現在 HTML 與 JS。
+   */
+  const bindSignUpLinks = () => {
+    const url = window.constants.DEFAULTS.SIGN_UP_URL;
+    ['signUpLinkServer', 'signUpLinkLogin'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {el.href = url;}
+    });
+  };
+
+  /**
    * 初始化所有事件綁定。
    * 假設在 view-switcher 之後載入，DOM 已準備好。
    */
@@ -153,6 +165,7 @@
     bindLogoutBtn();
     bindPasswordToggle('loginPwd', 'loginPwdToggle', 'loginPwdIcon');
     bindPasswordToggle('pemPwdInput', 'pemPwdToggle', 'pemPwdIcon');
+    bindSignUpLinks();
   };
 
   // DOM 載入後初始化

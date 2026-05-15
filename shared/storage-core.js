@@ -24,7 +24,7 @@
    * @throws {Error}
    */
   const verifyPrivateKeyLogic = (auth, pemContent) => {
-    if (!auth?.account) throw new Error(window.constants.getMessage('NO_LOGIN_DATA', 'zhTW'));
+    if (!auth?.account) throw new Error(window.constants.getMessage('NO_LOGIN_DATA'));
     const keyFileBase64 = window.utils.getPrivateKeyBase64(pemContent);
     return {
       ...auth,

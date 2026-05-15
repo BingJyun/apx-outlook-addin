@@ -6,8 +6,8 @@
             xsi:type="MailApp">
 
   <Id>1f63c811-279b-4a21-b001-ec879241a1be</Id>
-  <Version>1.0.0.0</Version>
-  <ProviderName>APX.AI</ProviderName>
+  <Version>1.1.0.0</Version>
+  <ProviderName>I-ONE INFORMATION TECHNOLOGY CO., LTD.</ProviderName>
   <DefaultLocale>zh-TW</DefaultLocale>
   <DisplayName DefaultValue="APX.AI 安全傳送"/>
   <Description DefaultValue="使用 APX.AI 安全傳送大型附件，保護企業機密資料。"/>

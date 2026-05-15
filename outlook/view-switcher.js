@@ -29,7 +29,6 @@
 
   /**
    * 初始化所有 [data-key] 元素的文字內容。
-   * 使用 constants.getMessage(key, 'zhTW') 設定 textContent。
    * @returns {void}
    * @private
    */
@@ -38,14 +37,13 @@
     elements.forEach((element) => {
       const key = element.getAttribute('data-key');
       if (key) {
-        element.textContent = window.constants.getMessage(key, 'zhTW');
+        element.textContent = window.constants.getMessage(key);
       }
     });
   };
 
   /**
    * 初始化所有 [data-placeholder-key] 元素的 placeholder。
-   * 使用 constants.getMessage(key, 'zhTW') 設定 placeholder。
    * @returns {void}
    * @private
    */
@@ -54,7 +52,7 @@
     elements.forEach((element) => {
       const key = element.getAttribute('data-placeholder-key');
       if (key) {
-        element.placeholder = window.constants.getMessage(key, 'zhTW');
+        element.placeholder = window.constants.getMessage(key);
       }
     });
   };
@@ -85,14 +83,14 @@
 
   /**
    * 顯示成功 View 並設定訊息。
-   * 直接使用 constants.getMessage(key, 'zhTW') 設定 textContent。
+   * 直接使用 constants.getMessage(key) 設定 textContent。
    * @param {string} messageKey - 成功訊息鍵值（來自 constants.MESSAGES）。
    * @public
    */
   const showSuccess = (messageKey) => {
     const successElement = document.querySelector('[data-key="SUCCESS_MESSAGE"]');
     if (successElement) {
-      successElement.textContent = window.constants.getMessage(messageKey, 'zhTW');
+      successElement.textContent = window.constants.getMessage(messageKey);
     }
     showView(window.constants.VIEWS.SUCCESS);
   };
@@ -126,7 +124,7 @@
       // 更新 UI 顯示
       const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
-        displayElement.textContent = email || window.constants.getMessage('LOADING_RECIPIENT', 'zhTW');
+        displayElement.textContent = email || window.constants.getMessage('LOADING_RECIPIENT');
       }
 
       return { email, memberReceiveAcc };
@@ -134,7 +132,7 @@
       window.errorHandler.log('warn', 'loadRecipientInfo 錯誤', err);
       const displayElement = document.getElementById('recipientDisplay');
       if (displayElement) {
-        displayElement.textContent = window.constants.getMessage('NO_RECIPIENT', 'zhTW');
+        displayElement.textContent = window.constants.getMessage('NO_RECIPIENT');
       }
       return { email: null, memberReceiveAcc: null };
     }

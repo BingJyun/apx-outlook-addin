@@ -52,7 +52,7 @@
     }
 
     // 更新狀態：上傳中
-    uploadStatus.textContent = window.constants.getMessage('UPLOADING', 'zhTW');
+    uploadStatus.textContent = window.constants.getMessage('UPLOADING');
 
     // 呼叫 API 上傳
     await window.apiService.uploadFile({
@@ -64,7 +64,7 @@
     });
 
     // 更新狀態：成功
-    uploadStatus.textContent = window.constants.getMessage('SUCCESS', 'zhTW');
+    uploadStatus.textContent = window.constants.getMessage('SUCCESS');
 
     // 通知 link-inserter 插入連結
     window.linkInserter.insertDownloadLink(file.name, serverUrlData.url);

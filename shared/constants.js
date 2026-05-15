@@ -35,6 +35,7 @@
    */
   const DEFAULTS = {
     API_BASE_URL: 'https://apxpoc.ioneit.com',
+    SIGN_UP_URL: 'https://add-in.ioneit.com/',
     MAX_POLLS: 60,
     POLL_INTERVAL_MS: 2000,
     MAX_FILE_SIZE_BYTES: 25 * 1024 * 1024, // 25MB
@@ -67,12 +68,30 @@
   };
 
   /**
-   * i18n 中英（台灣用語），從 storage 載語言碼切換。
+   * 依 Office.context.displayLanguage 偵測語系，瀏覽器（Gmail）則 fallback 到 navigator.language。
+   * 'zh-*' → 'zhTW'，其餘 → 'enUS'（AppSource 預設英文）。
+   * @returns {'zhTW'|'enUS'}
+   */
+  const detectLanguage = () => {
+    let lang = '';
+    if (typeof Office !== 'undefined' && Office.context?.displayLanguage) {
+      lang = Office.context.displayLanguage;
+    } else if (typeof navigator !== 'undefined' && navigator.language) {
+      lang = navigator.language;
+    }
+    return lang.toLowerCase().startsWith('zh') ? 'zhTW' : 'enUS';
+  };
+
+  /**
+   * i18n 中英（台灣用語）。未指定 language 時自動偵測。
    * @param {string} key - 訊息鍵。
-   * @param {string} language - 'zhTW' | 'en-US'。
+   * @param {string} [language] - 'zhTW' | 'enUS'，省略則自動偵測。
    * @returns {string} 訊息。
    */
-  const getMessage = (key, language = 'zhTW') => {
+  const getMessage = (key, language) => {
+    if (!language) {
+      language = detectLanguage();
+    }
     const messages = {
       zhTW: {
         // 錯誤
@@ -102,6 +121,12 @@
         GMAIL_BUTTON_TEXT: '🔐 用 APX.AI 傳送',
         DOWNLOAD_FILL_FIELDS: '請填寫帳號、密碼，選擇私鑰檔案並輸入私鑰密碼。',
         // UI 標籤
+        FRE_VALUE_TITLE: 'APX.AI 加密傳送',
+        FRE_VALUE_BODY: '安全傳送超過 25 MB 的大型附件；檔案以端對端加密保護，協助企業守住機密資料。',
+        FRE_GET_STARTED: '設定您的伺服器網址即可開始使用。',
+        SIGN_UP_PROMPT: '還沒有帳號？',
+        SIGN_UP_LINK_TEXT: '立即申請',
+        ENTERPRISE_NOTE: '企業用戶請聯絡 support@ioneit.com 取得專屬帳號。',
         SERVER_URL_TITLE: '設定伺服器 URL',
         SERVER_URL_DESCRIPTION: '請輸入 APX.AI 伺服器網址',
         SERVER_URL_PLACEHOLDER: '例如：https://apxpoc.ioneit.com',
@@ -153,6 +178,12 @@
         GMAIL_BUTTON_TEXT: '🔐 Send with APX.AI',
         DOWNLOAD_FILL_FIELDS: 'Please fill in account, password, select private key file, and enter private key password.',
         // UI labels
+        FRE_VALUE_TITLE: 'APX.AI Encrypted Send',
+        FRE_VALUE_BODY: "Securely send large attachments over 25 MB. Files are end-to-end encrypted to protect your organization's confidential data.",
+        FRE_GET_STARTED: 'Enter your server URL below to get started.',
+        SIGN_UP_PROMPT: "Don't have an account?",
+        SIGN_UP_LINK_TEXT: 'Sign up',
+        ENTERPRISE_NOTE: 'Enterprise customers: contact support@ioneit.com to provision accounts.',
         SERVER_URL_TITLE: 'Set Server URL',
         SERVER_URL_DESCRIPTION: 'Please enter the APX.AI server URL',
         SERVER_URL_PLACEHOLDER: 'e.g., https://apxpoc.ioneit.com',
@@ -197,6 +228,7 @@
     STORAGE_KEYS,
     GMAIL_SELECTORS,
     getMessage,
+    detectLanguage,
     STYLES,
   };
 })();

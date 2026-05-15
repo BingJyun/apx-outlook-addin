@@ -34,7 +34,7 @@
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(window.constants.getMessage('UPLOAD_FAILED', 'zhTW')
+      throw new Error(window.constants.getMessage('UPLOAD_FAILED')
         .replace('{status}', response.status)
         .replace('{error}', errorText));
     }
@@ -72,7 +72,7 @@
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(window.constants.getMessage('DOWNLOAD_INIT_FAILED', 'zhTW')
+      throw new Error(window.constants.getMessage('DOWNLOAD_INIT_FAILED')
         .replace('{status}', response.status)
         .replace('{error}', errorText));
     }
@@ -84,7 +84,7 @@
 
     const taskId = result.Data?.taskId;
     if (!taskId) {
-      throw new Error(window.constants.getMessage('NO_TASK_ID', 'zhTW'));
+      throw new Error(window.constants.getMessage('NO_TASK_ID'));
     }
 
     return taskId;
