@@ -155,6 +155,17 @@
   };
 
   /**
+   * 預填 Server URL 輸入框為預設 API_BASE_URL，
+   * 讓審查者與一般使用者直接按 Continue 即可，企業客戶仍可改寫。
+   */
+  const prefillServerUrl = () => {
+    const input = document.getElementById('serverUrlInput');
+    if (input && !input.value) {
+      input.value = window.constants.DEFAULTS.API_BASE_URL;
+    }
+  };
+
+  /**
    * 初始化所有事件綁定。
    * 假設在 view-switcher 之後載入，DOM 已準備好。
    */
@@ -166,6 +177,7 @@
     bindPasswordToggle('loginPwd', 'loginPwdToggle', 'loginPwdIcon');
     bindPasswordToggle('pemPwdInput', 'pemPwdToggle', 'pemPwdIcon');
     bindSignUpLinks();
+    prefillServerUrl();
   };
 
   // DOM 載入後初始化
