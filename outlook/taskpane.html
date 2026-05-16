@@ -85,12 +85,12 @@
     <div id="privateKeyView" class="view" data-view="privateKeyView">
         <img src="../icons/icon80.png" alt="APX.AI Logo" class="logo mb-3">
         <h5 class="mb-3 text-center" data-key="PRIVATE_KEY_TITLE"></h5>
-        <input type="file" id="pemFileInput" class="form-control mb-3" accept=".pem">
+        <input type="file" id="keyFileInput" class="form-control mb-3" accept=".json,application/json">
         <div class="input-group mb-3">
-            <input type="password" id="pemPwdInput" class="form-control" placeholder=""
+            <input type="password" id="keyPwdInput" class="form-control" placeholder=""
                 data-placeholder-key="PRIVATE_KEY_PASSWORD_PLACEHOLDER">
-            <button type="button" id="pemPwdToggle" class="btn btn-password-toggle">
-                <i id="pemPwdIcon" class="bi bi-eye-slash"></i>
+            <button type="button" id="keyPwdToggle" class="btn btn-password-toggle">
+                <i id="keyPwdIcon" class="bi bi-eye-slash"></i>
             </button>
         </div>
         <button id="verifyKeyBtn" class="btn btn-primary w-100" data-key="VERIFY_KEY_BUTTON"></button>

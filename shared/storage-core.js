@@ -19,13 +19,13 @@
   /**
    * 驗證私鑰 + 更新認證（純邏輯）。
    * @param {object} auth - 現有認證
-   * @param {string} pemContent - PEM
+   * @param {string} keyContent - 私鑰檔案內容
    * @returns {object} 更新後認證
    * @throws {Error}
    */
-  const verifyPrivateKeyLogic = (auth, pemContent) => {
+  const verifyPrivateKeyLogic = (auth, keyContent) => {
     if (!auth?.account) throw new Error(window.constants.getMessage('NO_LOGIN_DATA'));
-    const keyFileBase64 = window.utils.getPrivateKeyBase64(pemContent);
+    const keyFileBase64 = window.utils.getPrivateKeyBase64(keyContent);
     return {
       ...auth,
       keyFileBase64,

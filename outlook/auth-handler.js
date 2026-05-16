@@ -74,26 +74,26 @@
     if (!verifyKeyBtn) {return;}
 
     verifyKeyBtn.addEventListener('click', async () => {
-      const pemFileInput = document.getElementById('pemFileInput');
-      const pemPwdInput = document.getElementById('pemPwdInput');
-      if (!pemFileInput || !pemPwdInput) {return;}
+      const keyFileInput = document.getElementById('keyFileInput');
+      const keyPwdInput = document.getElementById('keyPwdInput');
+      if (!keyFileInput || !keyPwdInput) {return;}
 
-      const file = pemFileInput.files[0];
-      const pemPwd = pemPwdInput.value.trim();
+      const file = keyFileInput.files[0];
+      const keyPwd = keyPwdInput.value.trim();
 
       if (!file) {
         window.errorHandler.showError('NO_PRIVATE_KEY_FILE');
         return;
       }
 
-      if (!pemPwd) {
+      if (!keyPwd) {
         window.errorHandler.showError('EMPTY_PRIVATE_KEY_PASSWORD');
         return;
       }
 
       try {
-        const pemContent = await file.text();
-        await window.apxStorage.verifyPrivateKey(pemContent);
+        const keyContent = await file.text();
+        await window.apxStorage.verifyPrivateKey(keyContent);
         window.viewSwitcher.showView(window.constants.VIEWS.MAIN);
       } catch {
         window.errorHandler.handleAuthError('AUTH_EXPIRED');
@@ -175,7 +175,7 @@
     bindVerifyKeyBtn();
     bindLogoutBtn();
     bindPasswordToggle('loginPwd', 'loginPwdToggle', 'loginPwdIcon');
-    bindPasswordToggle('pemPwdInput', 'pemPwdToggle', 'pemPwdIcon');
+    bindPasswordToggle('keyPwdInput', 'keyPwdToggle', 'keyPwdIcon');
     bindSignUpLinks();
     prefillServerUrl();
   };

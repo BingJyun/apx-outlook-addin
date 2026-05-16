@@ -24,11 +24,11 @@
   };
 
   /**
-   * PEM to Base64（storage 內嵌備份）。
-   * @param {string} pemContent
+   * 私鑰檔案內容轉 Base64（storage 內嵌備份）。
+   * @param {string} keyContent
    * @returns {string}
    */
-  const getPrivateKeyBase64 = (pemContent) => btoa(pemContent);
+  const getPrivateKeyBase64 = (keyContent) => btoa(keyContent);
 
   // Global 暴露
   window.utils = {

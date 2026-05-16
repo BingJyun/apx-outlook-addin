@@ -252,12 +252,12 @@
 
   /**
    * 驗證私鑰並更新認證資料。
-   * @param {string} pemContent - PEM 內容。
+   * @param {string} keyContent - 私鑰檔案內容。
    * @returns {Promise<void>}
    */
-  const verifyPrivateKey = async (pemContent) => {
+  const verifyPrivateKey = async (keyContent) => {
     const authData = await loadWithExpiry(window.constants.STORAGE_KEYS.AUTH);
-    const updatedAuth = window.storageCore.verifyPrivateKeyLogic(authData, pemContent);
+    const updatedAuth = window.storageCore.verifyPrivateKeyLogic(authData, keyContent);
     await saveWithExpiry(window.constants.STORAGE_KEYS.AUTH, updatedAuth);
   };
 
