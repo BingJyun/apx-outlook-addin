@@ -27,27 +27,31 @@
     const uploadStatus = document.getElementById(ELEMENTS.UPLOAD_STATUS);
     const file = fileInput.files[0];
 
+    // 重置狀態樣式（清除前次錯誤殘留）
+    uploadStatus.className = 'small text-break';
+    uploadStatus.textContent = '';
+
     if (!file) {
-      window.errorHandler.showError('NO_FILE_SELECTED');
+      window.errorHandler.showInlineError('NO_FILE_SELECTED');
       return;
     }
 
     // 載入必要資料
     const authData = await window.apxStorage.load();
     if (!authData || !authData.account || !authData.password || !authData.keyFileBase64) {
-      window.errorHandler.showError('NO_LOGIN_DATA');
+      window.errorHandler.showInlineError('NO_LOGIN_DATA');
       return;
     }
 
     const serverUrlData = await window.apxStorage.loadServerUrl();
     if (!serverUrlData || !serverUrlData.url) {
-      window.errorHandler.showError('NO_SERVER_URL');
+      window.errorHandler.showInlineError('NO_SERVER_URL');
       return;
     }
 
     const memberReceiveAcc = await window.viewSwitcher.getRecipient();
     if (!memberReceiveAcc) {
-      window.errorHandler.showError('NO_RECIPIENT');
+      window.errorHandler.showInlineError('NO_RECIPIENT');
       return;
     }
 
@@ -80,7 +84,7 @@
         try {
           await handleUpload();
         } catch (err) {
-          window.errorHandler.showError('UPLOAD_FAILED', err?.message);
+          window.errorHandler.showInlineError('UPLOAD_FAILED', err?.message);
         }
       });
     }

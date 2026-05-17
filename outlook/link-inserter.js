@@ -41,7 +41,7 @@ async function insertDownloadLink(fileName, baseUrl) {
     Office.context.ui.closeContainer();
 
   } catch (error) {
-    window.errorHandler.showError('UPLOAD_FAILED', error?.message);
+    window.errorHandler.showInlineError('UPLOAD_FAILED', error?.message);
     throw error; // 重新拋出以便上層處理
   }
 }

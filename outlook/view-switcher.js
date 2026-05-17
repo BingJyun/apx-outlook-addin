@@ -339,6 +339,14 @@
       window.errorHandler.log('warn', 'AttachmentsChanged 事件註冊失敗', e);
     }
 
+    // 綁定錯誤頁返回按鈕：依當前 storage 狀態重新導航。
+    const errorBackBtn = document.getElementById('errorBackBtn');
+    if (errorBackBtn) {
+      errorBackBtn.addEventListener('click', () => {
+        checkStorageAndNavigate();
+      });
+    }
+
     // 初始載入收件人（帶重試，解決時序問題）
     await loadRecipientInfoWithRetry();
 

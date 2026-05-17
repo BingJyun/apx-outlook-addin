@@ -65,6 +65,21 @@
   };
 
   /**
+   * 在 mainView 的 uploadStatus 內 inline 顯示錯誤，不切換 View。
+   * 用於上傳流程與表單驗證錯誤，讓用戶留在原地直接重試。
+   * @param {string} messageKey - 錯誤訊息鍵值。
+   * @param {string} [rawMessage] - 後端原始訊息（優先於 i18n）。
+   */
+  const showInlineError = (messageKey, rawMessage) => {
+    log('error', `showInlineError: ${messageKey}`, rawMessage);
+    const statusEl = document.getElementById('uploadStatus');
+    if (statusEl) {
+      statusEl.textContent = rawMessage || window.constants.getMessage(messageKey);
+      statusEl.className = 'small text-break text-danger';
+    }
+  };
+
+  /**
    * 處理認證相關錯誤：清除 storage 並顯示錯誤。
    * 用於 AUTH_EXPIRED、DOWNLOAD_AUTH_FAILED 等。
    * @param {string} messageKey - 錯誤訊息鍵值。
@@ -84,6 +99,7 @@
   // 暴露公開 API
   window.errorHandler = {
     showError,
+    showInlineError,
     handleAuthError,
     log,
     getLogs,
