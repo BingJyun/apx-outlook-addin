@@ -51,12 +51,12 @@
    * 直接設定 [data-key="ERROR_MESSAGE"] 以支援 i18n，並檢查 viewSwitcher 可用性後切換 View。
    * @param {string} messageKey - 錯誤訊息鍵值（來自 constants.MESSAGES）。
    */
-  const showError = (messageKey) => {
-    log('error', `showError: ${messageKey}`);
+  const showError = (messageKey, rawMessage) => {
+    log('error', `showError: ${messageKey}`, rawMessage);
     // 設定錯誤訊息文字
     const errorElement = document.querySelector('[data-key="ERROR_MESSAGE"]');
     if (errorElement) {
-      errorElement.textContent = window.constants.getMessage(messageKey);
+      errorElement.textContent = rawMessage || window.constants.getMessage(messageKey);
     }
     // 切換到錯誤 View（若 viewSwitcher 可用）
     if (window.viewSwitcher && typeof window.viewSwitcher.showView === 'function') {

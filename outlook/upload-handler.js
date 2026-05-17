@@ -79,8 +79,8 @@
       uploadBtn.addEventListener('click', async () => {
         try {
           await handleUpload();
-        } catch {
-          window.errorHandler.showError('UPLOAD_FAILED');
+        } catch (err) {
+          window.errorHandler.showError('UPLOAD_FAILED', err?.message);
         }
       });
     }
