@@ -6,6 +6,8 @@
   },
   "type": "module",
   "devDependencies": {
-    "eslint": "^9.39.2"
+    "eslint": "^9.39.2",
+    "office-addin-debugging": "^6.1.1",
+    "office-addin-mock": "^3.0.9"
   }
 }
